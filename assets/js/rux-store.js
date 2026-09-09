@@ -9,9 +9,9 @@ const RUX_CONFIG = {
   phone: "03006458707",
   whatsapp: "923006458707",
   email: "rux.chemicals@gmail.com",
-  freeShippingThreshold: 1500,
-  standardShippingFee: 150,
-  currency: "Rs. "
+  freeShippingThreshold: 0,
+  standardShippingFee: 0,
+  currency: ""
 };
 
 // Master Product Database: 4 Launched Products & 3 Coming Soon Lineup
@@ -536,7 +536,7 @@ class RuxStore {
   updateCartUI() {
     const totals = this.getTotals();
 
-    // Update all cart counters
+    // Update all quote list counters
     const counters = document.querySelectorAll(".cart-counter");
     counters.forEach(el => {
       el.textContent = totals.itemCount;
@@ -553,16 +553,16 @@ class RuxStore {
       if (this.cart.length === 0) {
         drawerContainer.innerHTML = `
           <div class="cart-empty-state">
-            <div class="cart-empty-icon">🛒</div>
-            <h4>Your cart is empty</h4>
-            <p>Explore our sparkling clean products and add them to your cart.</p>
-            <a href="shop.html" class="btn btn-primary btn-sm" style="margin-top: 14px;">Shop Products</a>
+            <div class="cart-empty-icon" style="font-size: 2.5rem;">📋</div>
+            <h4 style="margin-top: 10px;">Your Quote Request List is Empty</h4>
+            <p style="color: #64748b; font-size: 0.9rem;">Browse our cleaning products and add items to request custom retail or wholesale quotes.</p>
+            <a href="shop.html" class="btn btn-primary btn-sm" style="margin-top: 14px;">Browse Catalog</a>
           </div>
         `;
       } else {
         drawerContainer.innerHTML = this.cart.map((item, idx) => `
           <div class="cart-item">
-            <img src="${item.image}" alt="${item.productName}" class="cart-item-img">
+            <img src="${item.image}" alt="${item.productName}" class="cart-item-img" style="object-fit: contain; padding: 4px; background: #f8fafc;">
             <div class="cart-item-details">
               <div class="cart-item-title">${item.productName}</div>
               <div class="cart-item-variant">${item.variantLabel}</div>
@@ -572,7 +572,7 @@ class RuxStore {
                   <span class="qty-val">${item.quantity}</span>
                   <button class="qty-btn" onclick="ruxStore.updateQuantity(${idx}, 1)">+</button>
                 </div>
-                <div class="cart-item-price">${RUX_CONFIG.currency}${(item.unitPrice * item.quantity).toLocaleString()}</div>
+                <div class="cart-item-price" style="color: var(--rux-blue); font-weight: 700; font-size: 0.85rem;">Quote on Request</div>
                 <button class="cart-item-remove" onclick="ruxStore.removeFromCart(${idx})" title="Remove">✕</button>
               </div>
             </div>
@@ -582,21 +582,29 @@ class RuxStore {
     }
 
     if (drawerSubtotal) {
-      drawerSubtotal.textContent = `${RUX_CONFIG.currency}${totals.subtotal.toLocaleString()}`;
+      drawerSubtotal.textContent = "Contact for Quote";
     }
 
-    // Update Free Shipping Bar
+    // Update Shipping Bar
     if (shippingBar && shippingText) {
-      const remaining = RUX_CONFIG.freeShippingThreshold - totals.subtotal;
-      if (remaining <= 0) {
-        shippingBar.style.width = "100%";
-        shippingText.innerHTML = `<span>🎉 <strong>FREE SHIPPING UNLOCKED!</strong></span> <span>100%</span>`;
-      } else {
-        const pct = Math.min(100, Math.round((totals.subtotal / RUX_CONFIG.freeShippingThreshold) * 100));
-        shippingBar.style.width = `${pct}%`;
-        shippingText.innerHTML = `<span>Add <strong>${RUX_CONFIG.currency}${remaining}</strong> more for FREE Delivery!</span> <span>${pct}%</span>`;
-      }
+      shippingBar.style.width = "100%";
+      shippingText.innerHTML = `<span>✨ <strong>Direct Factory Supply Across Pakistan</strong></span> <span>TM # 768691</span>`;
     }
+  }
+
+  submitWhatsAppQuoteRequest() {
+    if (this.cart.length === 0) {
+      this.showToast("Your quote list is empty! Please add products first.");
+      return;
+    }
+    let msg = `*PRICE QUOTATION REQUEST - RUX CLEANING & SHINE*\n`;
+    msg += `Official Trademark: ${RUX_CONFIG.trademark}\n\n`;
+    msg += `*Requested Products:*\n`;
+    this.cart.forEach((item, i) => {
+      msg += `${i + 1}. ${item.productName} [${item.variantLabel}] - Qty: ${item.quantity}\n`;
+    });
+    msg += `\nHello, please provide current wholesale & retail price quotes and delivery terms for the items listed above.`;
+    window.open(`https://wa.me/923006458707?text=${encodeURIComponent(msg)}`, "_blank");
   }
 
   openCartDrawer() {
@@ -648,14 +656,16 @@ class RuxStore {
               : `<span style="color: #64748b; font-weight: 600;">🔒 In Laboratory Formulation • Reviews open upon launch</span>`}
           </div>
           <p style="font-style: italic; color: #0056b3; font-weight: 600; font-size: 0.95rem; margin-bottom: 12px;">"${product.tagline}"</p>
-          <div style="font-size: 1.8rem; font-weight: 800; color: #0056b3; font-family: var(--font-heading); margin-bottom: 16px;" id="qvPriceDisplay">
-            ${RUX_CONFIG.currency}${defaultVariant.price}
-            ${defaultVariant.originalPrice ? `<span style="font-size: 1rem; color: #94a3b8; text-decoration: line-through; margin-left: 8px;">${RUX_CONFIG.currency}${defaultVariant.originalPrice}</span>` : ""}
+          <div style="font-size: 1.6rem; font-weight: 800; color: #0056b3; font-family: var(--font-heading); margin-bottom: 4px;" id="qvPriceDisplay">
+            Contact for Quote
+          </div>
+          <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">
+            Factory direct supply • Wholesale & retail quotes available
           </div>
           <p style="font-size: 0.92rem; color: #475569; line-height: 1.6; margin-bottom: 20px;">${product.shortDesc}</p>
           
           <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 8px;">Select Pack Size / Volume:</label>
+            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 8px;">Available Pack Sizes:</label>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               ${product.variants.map((v, i) => `
                 <button type="button" class="size-pill ${i === 0 ? 'active' : ''}" onclick="ruxStore.selectQuickViewVariant('${product.id}', ${i}, this)">
@@ -665,20 +675,21 @@ class RuxStore {
             </div>
           </div>
 
-          <div style="background: #f0fdf4; border: 1px dashed #10b981; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 0.85rem;">
-            <strong>📦 Wholesale Carton Option Available:</strong><br>
-            Pack Size: <strong>${defaultVariant.cartonSize}</strong> for <strong>${RUX_CONFIG.currency}${defaultVariant.cartonPrice}</strong>
-            <button class="btn btn-secondary btn-sm" style="margin-top: 8px; width: 100%; border-color: #10b981; color: #059669;" onclick="ruxStore.addToCart('${product.id}', 0, 1, true); ruxStore.closeQuickView();">
-              Add Wholesale Carton (${defaultVariant.cartonSize})
-            </button>
+          <div style="background: #f0fdf4; border: 1.5px dashed #10b981; padding: 14px; border-radius: 10px; margin-bottom: 20px; font-size: 0.85rem;">
+            <strong style="color: #065f46;">📦 Wholesale Carton Option:</strong><br>
+            Standard Packing: <strong>${defaultVariant.cartonSize}</strong><br>
+            <span style="color: #059669;">Special carton dealership rates and bulk dispatch available upon request.</span>
           </div>
 
-          <div style="display: flex; gap: 12px;">
-            <button class="btn btn-primary btn-full" onclick="ruxStore.addToCart('${product.id}', 0, 1, false); ruxStore.closeQuickView();">
-              Add to Cart
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="https://wa.me/923006458707?text=Hello%20RUX%20Team%2C%20I%20would%20like%20to%20request%20a%20price%20quote%20for%20${encodeURIComponent(product.name)}" target="_blank" class="btn btn-whatsapp" style="flex-grow: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+              💬 Request Quote on WhatsApp
+            </a>
+            <button class="btn btn-secondary" onclick="ruxStore.addToCart('${product.id}', 0, 1, false); ruxStore.closeQuickView();" title="Add to Quote List">
+              + Quote List
             </button>
             <a href="product.html?id=${product.id}" class="btn btn-secondary" style="white-space: nowrap;">
-              View Full Details →
+              View Details →
             </a>
           </div>
         </div>
@@ -700,10 +711,7 @@ class RuxStore {
 
     const priceDisplay = document.getElementById("qvPriceDisplay");
     if (priceDisplay) {
-      priceDisplay.innerHTML = `
-        ${RUX_CONFIG.currency}${variant.price}
-        ${variant.originalPrice ? `<span style="font-size: 1rem; color: #94a3b8; text-decoration: line-through; margin-left: 8px;">${RUX_CONFIG.currency}${variant.originalPrice}</span>` : ""}
-      `;
+      priceDisplay.innerHTML = "Contact for Quote";
     }
   }
 
@@ -738,29 +746,24 @@ class RuxStore {
   }
 
   buildWhatsAppCartMessage(customerInfo = {}) {
-    const totals = this.getTotals();
-    let msg = `*NEW ORDER - RUX CLEANING & SHINE*\n`;
+    let msg = `*PRICE QUOTATION REQUEST - RUX CLEANING & SHINE*\n`;
     msg += `Official Trademark: ${RUX_CONFIG.trademark}\n\n`;
-    msg += `*Ordered Products:*\n`;
+    msg += `*Requested Products:*\n`;
 
     this.cart.forEach((item, i) => {
-      msg += `${i + 1}. ${item.productName} [${item.variantLabel}] x ${item.quantity} = ${RUX_CONFIG.currency}${(item.unitPrice * item.quantity).toLocaleString()}\n`;
+      msg += `${i + 1}. ${item.productName} [${item.variantLabel}] - Qty: ${item.quantity}\n`;
     });
-
-    msg += `\n*Subtotal:* ${RUX_CONFIG.currency}${totals.subtotal.toLocaleString()}`;
-    if (totals.discount > 0) msg += `\n*Discount:* -${RUX_CONFIG.currency}${totals.discount.toLocaleString()}`;
-    msg += `\n*Delivery Fee:* ${totals.shipping === 0 ? "FREE" : RUX_CONFIG.currency + totals.shipping}`;
-    msg += `\n*Grand Total:* ${RUX_CONFIG.currency}${totals.total.toLocaleString()}\n`;
 
     if (customerInfo.name) {
       msg += `\n*Customer Details:*\n`;
       msg += `Name: ${customerInfo.name}\n`;
       msg += `Phone: ${customerInfo.phone}\n`;
       msg += `City: ${customerInfo.city}\n`;
-      msg += `Address: ${customerInfo.address}\n`;
-      msg += `Payment: ${customerInfo.paymentMethod || "Cash on Delivery (COD)"}\n`;
+      msg += `Address: ${customerInfo.address || "N/A"}\n`;
+      msg += `Type: ${customerInfo.businessType || "Retail / Dealership Inquiry"}\n`;
     }
 
+    msg += `\nHello, please provide pricing, carton rates, and delivery details for the items above.`;
     return encodeURIComponent(msg);
   }
 
@@ -776,7 +779,6 @@ class RuxStore {
             ${isComingSoon 
               ? `<span class="badge" style="background: #e11d48; color: #fff; font-weight: 800; letter-spacing: 0.5px;">COMING SOON</span>` 
               : `<span class="badge badge-primary">${product.badge}</span>`}
-            ${!isComingSoon && defaultVariant.originalPrice ? `<span class="badge badge-danger">Save Rs. ${defaultVariant.originalPrice - defaultVariant.price}</span>` : ""}
           </div>
           <div class="quick-actions">
             <button class="quick-btn" onclick="ruxStore.openQuickView('${product.id}')">
@@ -802,12 +804,15 @@ class RuxStore {
           <div class="product-card-footer">
             <div class="price-wrap">
               ${isComingSoon 
-                ? `<span class="current-price" style="color: #0284c7; font-size: 0.95rem;">Coming Soon</span>` 
-                : `<span class="current-price">${RUX_CONFIG.currency}${defaultVariant.price}</span>${defaultVariant.originalPrice ? `<span class="original-price">${RUX_CONFIG.currency}${defaultVariant.originalPrice}</span>` : ""}`}
+                ? `<span class="current-price" style="color: #0284c7; font-size: 0.92rem; font-weight: 700;">Coming Soon</span>` 
+                : `<span class="current-price" style="color: var(--rux-blue); font-size: 0.95rem; font-weight: 800;">Contact for Quote</span>`}
             </div>
             ${isComingSoon
               ? `<a href="https://wa.me/923006458707?text=Hello%20RUX%20Team%2C%20I%20am%20interested%20in%20pre-ordering%20${encodeURIComponent(product.name)}%20when%20launched" target="_blank" class="btn btn-sm" style="background: #0284c7; color: #fff; font-size: 0.72rem; padding: 6px 10px; border-radius: 6px; font-weight: 700; text-decoration: none;" title="Notify Me on WhatsApp">Notify Me</a>`
-              : `<button class="cart-add-btn" onclick="ruxStore.addToCart('${product.id}', 0, 1, false)" title="Add to Cart">+</button>`}
+              : `<div style="display: flex; gap: 6px; align-items: center;">
+                  <a href="https://wa.me/923006458707?text=Hello%20RUX%20Team%2C%20I%20would%20like%20to%20request%20a%20price%20quote%20for%20${encodeURIComponent(product.name)}" target="_blank" class="btn-quote-wa" style="background: #25d366; color: #fff; font-size: 0.75rem; padding: 6px 10px; border-radius: 6px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Request Quote on WhatsApp"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> Quote</a>
+                  <button class="cart-add-btn" onclick="ruxStore.addToCart('${product.id}', 0, 1, false)" title="Add to Quote List">+</button>
+                </div>`}
           </div>
         </div>
       </div>
@@ -841,10 +846,10 @@ class RuxStore {
     } else {
       resultsBox.innerHTML = matched.map(p => `
         <a href="product.html?id=${p.id}" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
-          <img src="${p.images[0]}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
+          <img src="${p.images[0]}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: contain; background: #f8fafc; padding: 2px;">
           <div>
             <div style="font-weight: 700; font-size: 0.85rem; color: #0f172a;">${p.name}</div>
-            <div style="font-size: 0.78rem; color: #0056b3; font-weight: 700;">${RUX_CONFIG.currency}${p.variants[0].price}</div>
+            <div style="font-size: 0.78rem; color: #0056b3; font-weight: 700;">Contact for Quote</div>
           </div>
         </a>
       `).join("");

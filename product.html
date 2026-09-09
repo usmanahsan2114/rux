@@ -106,10 +106,10 @@
           "Tagline here"
         </p>
 
-        <div class="pdp-price-row">
-          <span class="pdp-price" id="pdpPrice">Rs. 0</span>
-          <span id="pdpOriginalPrice" style="font-size: 1.2rem; color: #94a3b8; text-decoration: line-through;"></span>
-          <span class="badge badge-danger" id="pdpDiscountBadge" style="display: none;">Save Rs. 0</span>
+        <div class="pdp-quote-wrap" style="margin-bottom: 20px; background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 16px 20px;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Factory Direct Supply</div>
+          <div style="font-size: 1.8rem; font-weight: 800; color: #0056b3; font-family: var(--font-heading);">Contact for a Quote</div>
+          <p style="font-size: 0.88rem; color: #475569; margin: 4px 0 0 0;">Custom pricing available for individual retail bottles, commercial supplies, and wholesale master cartons.</p>
         </div>
 
         <p class="pdp-desc" id="pdpDesc">Detailed description here.</p>
@@ -125,14 +125,14 @@
         <!-- Wholesale Carton Box -->
         <div style="background: #f0fdf4; border: 1.5px dashed #10b981; border-radius: 14px; padding: 18px; margin-bottom: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <strong style="color: #065f46; font-size: 0.95rem;">📦 Buy Wholesale Carton & Save More!</strong>
-            <span class="badge badge-success">Wholesale Rate</span>
+            <strong style="color: #065f46; font-size: 0.95rem;">📦 Master Carton Wholesale Supply</strong>
+            <span class="badge badge-success">Wholesale Deals</span>
           </div>
-          <p style="font-size: 0.85rem; color: #047857; margin-bottom: 12px;" id="pdpCartonInfo">
-            Carton Packing: <strong>12 X 1000ml</strong> for only <strong>Rs. 2,700</strong> (Save Rs. 300 vs individual bottles).
+          <p style="font-size: 0.88rem; color: #047857; margin-bottom: 12px;" id="pdpCartonInfo">
+            Master Carton Packing: <strong>12 X 1000ml</strong>. Direct dealership and bulk carton supply across Pakistan.
           </p>
           <button class="btn btn-secondary btn-sm" id="pdpAddCartonBtn" style="border-color: #10b981; color: #065f46; background: #fff; width: 100%;">
-            Add Wholesale Carton to Cart 🛒
+            💬 Request Wholesale Carton Quote
           </button>
         </div>
 
@@ -144,19 +144,19 @@
             <button class="qty-btn" id="pdpQtyInc" style="width: 36px; height: 36px; font-size: 1.1rem;">+</button>
           </div>
 
-          <button class="btn btn-primary btn-lg" id="pdpAddToCartBtn" style="flex-grow: 1;">
-            <span>Add to Cart 🛒</span>
+          <button class="btn btn-whatsapp btn-lg" id="pdpWhatsAppBtn" style="flex-grow: 1;" title="Get Quote on WhatsApp">
+            <span>💬 Request Quote on WhatsApp</span>
           </button>
 
-          <button class="btn btn-whatsapp btn-lg" id="pdpWhatsAppBtn" title="Order directly on WhatsApp">
-            <span>💬 1-Click WhatsApp</span>
+          <button class="btn btn-primary btn-lg" id="pdpAddToCartBtn" style="white-space: nowrap;">
+            <span>+ Quote List</span>
           </button>
         </div>
 
         <!-- Trust Badges Row -->
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 30px; font-size: 0.85rem; color: #475569;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #10b981; font-size: 1.1rem;">✓</span> Free Shipping over Rs. 1,500
+            <span style="color: #10b981; font-size: 1.1rem;">✓</span> Fast Nationwide Dispatch
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="color: #10b981; font-size: 1.1rem;">✓</span> Cash on Delivery Available
@@ -165,7 +165,7 @@
             <span style="color: #10b981; font-size: 1.1rem;">✓</span> TM # 768691 Quality Tested
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #10b981; font-size: 1.1rem;">✓</span> Instant Customer Support
+            <span style="color: #10b981; font-size: 1.1rem;">✓</span> Instant Quotation Support
           </div>
         </div>
 
@@ -240,29 +240,31 @@
     <div class="cart-drawer">
       <div class="cart-drawer-header">
         <div class="cart-drawer-title">
-          <h3>Shopping Cart</h3>
+          <h3>Quote Request List</h3>
           <span class="badge badge-primary cart-counter">0</span>
         </div>
         <button class="cart-close-btn" id="closeCartDrawer">✕</button>
       </div>
       <div class="shipping-progress-wrap">
         <div class="shipping-progress-text" id="freeShippingText">
-          <span>Add <strong>Rs. 1,500</strong> for FREE Shipping!</span>
-          <span>0%</span>
+          <span>✨ <strong>Direct Factory Supply Across Pakistan</strong></span>
+          <span>TM # 768691</span>
         </div>
         <div class="shipping-bar">
-          <div class="shipping-fill" id="freeShippingBar"></div>
+          <div class="shipping-fill" id="freeShippingBar" style="width: 100%;"></div>
         </div>
       </div>
       <div class="cart-drawer-items" id="cartDrawerItems"></div>
       <div class="cart-drawer-footer">
         <div class="cart-subtotal-row">
-          <span style="font-weight: 600; color: #475569;">Subtotal:</span>
-          <span class="cart-subtotal-val" id="cartDrawerSubtotal">Rs. 0</span>
+          <span style="font-weight: 600; color: #475569;">Pricing:</span>
+          <span class="cart-subtotal-val" id="cartDrawerSubtotal">Contact for Quote</span>
         </div>
         <div class="cart-drawer-btns">
-          <a href="checkout.html" class="btn btn-primary btn-full">Proceed to Checkout 🔒</a>
-          <a href="cart.html" class="btn btn-secondary btn-full">View Cart & Discounts</a>
+          <button onclick="ruxStore.submitWhatsAppQuoteRequest()" class="btn btn-whatsapp btn-full" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            💬 Send Quote Request on WhatsApp
+          </button>
+          <a href="contact.html" class="btn btn-secondary btn-full">Submit Written Inquiry</a>
         </div>
       </div>
     </div>
@@ -360,20 +362,10 @@
       const sizeOptionsContainer = document.getElementById("pdpSizeOptions");
       function renderVariantUI() {
         const v = product.variants[selectedVariantIndex];
-        document.getElementById("pdpPrice").textContent = `Rs. ${v.price}`;
-        if (v.originalPrice) {
-          document.getElementById("pdpOriginalPrice").textContent = `Rs. ${v.originalPrice}`;
-          document.getElementById("pdpDiscountBadge").style.display = "inline-flex";
-          document.getElementById("pdpDiscountBadge").textContent = `Save Rs. ${v.originalPrice - v.price}`;
-        } else {
-          document.getElementById("pdpOriginalPrice").textContent = "";
-          document.getElementById("pdpDiscountBadge").style.display = "none";
-        }
-
         document.getElementById("pdpSpecCarton").textContent = v.cartonSize || "Direct Pack";
         document.getElementById("pdpCartonInfo").innerHTML = `
-          Master Carton Packing: <strong>${v.cartonSize}</strong> for <strong>Rs. ${v.cartonPrice.toLocaleString()}</strong> 
-          (Saves Rs. ${(v.cartonRetailTotal - v.cartonPrice).toLocaleString()} vs retail unit bottles).
+          Master Carton Packing: <strong>${v.cartonSize}</strong>.<br>
+          <span style="color: #059669; font-size: 0.85rem;">Inquire for wholesale dealership pricing and bulk freight dispatch across Pakistan.</span>
         `;
 
         sizeOptionsContainer.innerHTML = product.variants.map((variant, i) => `
@@ -402,25 +394,32 @@
         qtyVal.textContent = currentQuantity;
       });
 
-      // Add to Cart Buttons
+      // Add to Quote List Button
       document.getElementById("pdpAddToCartBtn").addEventListener("click", () => {
         ruxStore.addToCart(product.id, selectedVariantIndex, currentQuantity, false);
       });
 
+      // Carton Wholesale Quote Button
       document.getElementById("pdpAddCartonBtn").addEventListener("click", () => {
-        ruxStore.addToCart(product.id, selectedVariantIndex, 1, true);
+        const v = product.variants[selectedVariantIndex];
+        const text = encodeURIComponent(
+          `*WHOLESALE CARTON QUOTE - RUX CLEANING & SHINE*\n` +
+          `Product: ${product.name}\n` +
+          `Master Carton Packing: ${v.cartonSize}\n\n` +
+          `Hello, please provide current wholesale carton rates and minimum order requirements.`
+        );
+        window.open(`https://wa.me/923006458707?text=${text}`, "_blank");
       });
 
-      // WhatsApp 1-Click Order Button
+      // WhatsApp 1-Click Quote Button
       document.getElementById("pdpWhatsAppBtn").addEventListener("click", () => {
         const v = product.variants[selectedVariantIndex];
         const text = encodeURIComponent(
-          `*DIRECT ORDER - RUX STORE*\n` +
+          `*PRICE QUOTE REQUEST - RUX CLEANING & SHINE*\n` +
           `Product: ${product.name}\n` +
-          `Volume: ${v.volume}\n` +
-          `Quantity: ${currentQuantity}\n` +
-          `Total: Rs. ${(v.price * currentQuantity).toLocaleString()}\n\n` +
-          `Please confirm my order and send shipping details.`
+          `Pack Size: ${v.volume}\n` +
+          `Quantity: ${currentQuantity} unit(s)\n\n` +
+          `Hello, please provide pricing quotation and dispatch details.`
         );
         window.open(`https://wa.me/923006458707?text=${text}`, "_blank");
       });

@@ -18,7 +18,7 @@
     <div class="container top-bar-content">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span class="top-bar-badge">CATALOG</span>
-        <span>✨ <strong>FREE Delivery</strong> on orders over Rs. 1,500!</span>
+        <span>✨ <strong>Official RUX Store</strong> | Factory Direct Supply Across Pakistan | 📞 <strong>0300 6458707</strong></span>
       </div>
       <div class="top-bar-right">
         <span class="top-bar-link">📜 TM # 768691</span>
@@ -147,17 +147,8 @@
           </div>
         </div>
 
-        <!-- Price Range Slider -->
-        <div style="margin-bottom: 26px;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">
-            <span>Max Price:</span>
-            <span id="priceRangeVal" style="color: var(--rux-blue);">Rs. 1,000</span>
-          </div>
-          <input type="range" id="priceRangeInput" min="50" max="1000" step="50" value="1000" style="width: 100%;">
-        </div>
-
         <!-- Quick Reset -->
-        <button id="resetFiltersBtn" class="btn btn-secondary btn-sm btn-full">
+        <button id="resetFiltersBtn" class="btn btn-secondary btn-sm btn-full" style="margin-top: 10px;">
           Reset All Filters
         </button>
       </aside>
@@ -172,9 +163,8 @@
             <label for="sortSelect" style="font-size: 0.85rem; font-weight: 600;">Sort By:</label>
             <select id="sortSelect" class="form-control" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
               <option value="popular">Most Popular</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
               <option value="rating">Highest Rated</option>
+              <option value="name-asc">Alphabetical (A - Z)</option>
             </select>
           </div>
         </div>
@@ -187,34 +177,36 @@
     </div>
   </div>
 
-  <!-- Slide-out Cart Drawer -->
+  <!-- Slide-out Quote Request Drawer -->
   <div class="cart-drawer-overlay" id="cartDrawerOverlay">
     <div class="cart-drawer">
       <div class="cart-drawer-header">
         <div class="cart-drawer-title">
-          <h3>Shopping Cart</h3>
+          <h3>Quote Request List</h3>
           <span class="badge badge-primary cart-counter">0</span>
         </div>
         <button class="cart-close-btn" id="closeCartDrawer">✕</button>
       </div>
       <div class="shipping-progress-wrap">
         <div class="shipping-progress-text" id="freeShippingText">
-          <span>Add <strong>Rs. 1,500</strong> for FREE Shipping!</span>
-          <span>0%</span>
+          <span>✨ <strong>Direct Factory Supply Across Pakistan</strong></span>
+          <span>TM # 768691</span>
         </div>
         <div class="shipping-bar">
-          <div class="shipping-fill" id="freeShippingBar"></div>
+          <div class="shipping-fill" id="freeShippingBar" style="width: 100%;"></div>
         </div>
       </div>
       <div class="cart-drawer-items" id="cartDrawerItems"></div>
       <div class="cart-drawer-footer">
         <div class="cart-subtotal-row">
-          <span style="font-weight: 600; color: #475569;">Subtotal:</span>
-          <span class="cart-subtotal-val" id="cartDrawerSubtotal">Rs. 0</span>
+          <span style="font-weight: 600; color: #475569;">Pricing:</span>
+          <span class="cart-subtotal-val" id="cartDrawerSubtotal">Contact for Quote</span>
         </div>
         <div class="cart-drawer-btns">
-          <a href="checkout.html" class="btn btn-primary btn-full">Proceed to Checkout 🔒</a>
-          <a href="cart.html" class="btn btn-secondary btn-full">View Cart & Discounts</a>
+          <button class="btn btn-whatsapp btn-full" onclick="ruxStore.submitWhatsAppQuoteRequest()">
+            💬 Send Quote Request on WhatsApp
+          </button>
+          <a href="contact.html" class="btn btn-secondary btn-full">Submit Written Inquiry Form</a>
         </div>
       </div>
     </div>
@@ -258,8 +250,6 @@
       const searchInput = document.getElementById("shopSearchInput");
       const catRadios = document.querySelectorAll("input[name='shopCat']");
       const statusRadios = document.querySelectorAll("input[name='shopStatus']");
-      const priceInput = document.getElementById("priceRangeInput");
-      const priceVal = document.getElementById("priceRangeVal");
       const sortSelect = document.getElementById("sortSelect");
       const countText = document.getElementById("productCountText");
       const resetBtn = document.getElementById("resetFiltersBtn");
@@ -271,27 +261,21 @@
         let selectedStatus = "all";
         statusRadios.forEach(r => { if (r.checked) selectedStatus = r.value; });
 
-        const maxPrice = parseInt(priceInput.value || 1000);
-        priceVal.textContent = `Rs. ${maxPrice.toLocaleString()}`;
-
         let list = RUX_PRODUCTS.filter(p => {
           const matchQuery = p.name.toLowerCase().includes(query) || p.shortDesc.toLowerCase().includes(query);
           const matchCat = selectedCat === "all" || p.category === selectedCat;
-          const matchPrice = p.variants[0].price <= maxPrice;
           const matchStatus = selectedStatus === "all" ||
             (selectedStatus === "launched" && p.isLaunched) ||
             (selectedStatus === "coming-soon" && (p.status === "coming-soon" || !p.isLaunched));
-          return matchQuery && matchCat && matchPrice && matchStatus;
+          return matchQuery && matchCat && matchStatus;
         });
 
         // Sorting
         const sortMode = sortSelect.value;
-        if (sortMode === "price-asc") {
-          list.sort((a, b) => a.variants[0].price - b.variants[0].price);
-        } else if (sortMode === "price-desc") {
-          list.sort((a, b) => b.variants[0].price - a.variants[0].price);
-        } else if (sortMode === "rating") {
+        if (sortMode === "rating") {
           list.sort((a, b) => b.rating - a.rating);
+        } else if (sortMode === "name-asc") {
+          list.sort((a, b) => a.name.localeCompare(b.name));
         }
 
         countText.textContent = list.length;
@@ -305,7 +289,6 @@
       searchInput.addEventListener("input", filterAndRender);
       catRadios.forEach(r => r.addEventListener("change", filterAndRender));
       statusRadios.forEach(r => r.addEventListener("change", filterAndRender));
-      priceInput.addEventListener("input", filterAndRender);
       sortSelect.addEventListener("change", filterAndRender);
 
       if (resetBtn) {
@@ -313,7 +296,6 @@
           searchInput.value = "";
           document.querySelector("input[name='shopCat'][value='all']").checked = true;
           document.querySelector("input[name='shopStatus'][value='all']").checked = true;
-          priceInput.value = 1000;
           sortSelect.value = "popular";
           filterAndRender();
         });

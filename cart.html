@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Shopping Cart | RUX Cleaning & Shine</title>
-  <meta name="description" content="View items in your cart, apply promo discount codes, calculate free shipping, and proceed to checkout.">
+  <title>Your Quote Request List | RUX Cleaning & Shine</title>
+  <meta name="description" content="Review your selected RUX cleaning products and submit for a direct factory retail or wholesale price quote.">
   <link rel="icon" type="image/png" href="assets/images/rux-logo.png">
   <link rel="stylesheet" href="assets/css/rux-main.css">
   <meta name="geo.region" content="PK">
@@ -15,7 +15,7 @@
   <!-- Top Bar -->
   <div class="top-bar">
     <div class="container top-bar-content">
-      <div><span>✨ <strong>FREE Delivery</strong> across Pakistan on orders above Rs. 1,500!</span></div>
+      <div><span>✨ <strong>Official RUX Cleaning & Shine Store</strong> | Factory Direct Supply Across Pakistan</span></div>
       <div class="top-bar-right">
         <span>TM # 768691</span>
         <a href="https://wa.me/923006458707" class="top-bar-link" target="_blank" rel="noopener">WhatsApp: 0300 6458707</a>
@@ -36,7 +36,7 @@
         <a href="contact.html" class="nav-link">Contact</a>
       </nav>
       <div class="header-actions">
-        <a href="checkout.html" class="btn btn-primary btn-sm">Checkout 🔒</a>
+        <a href="contact.html" class="btn btn-primary btn-sm">Get a Quote 💬</a>
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
       </div>
     </div>
@@ -53,19 +53,19 @@
     </div>
   </header>
 
-  <!-- Main Cart Section -->
+  <!-- Main Quote List Section -->
   <main class="container" style="padding: 40px 20px 80px;">
-    <h1 style="font-size: 2.2rem; margin-bottom: 24px;">Your Shopping Cart</h1>
+    <h1 style="font-size: 2.2rem; margin-bottom: 24px;">Your Quote Request List</h1>
 
-    <!-- Free Delivery Progress Bar -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 24px; margin-bottom: 30px; box-shadow: var(--shadow-sm);">
-      <div class="shipping-progress-text" id="cartPageShippingText">
-        <span>Calculating free delivery status...</span>
-        <span>0%</span>
+    <!-- Dispatch Banner -->
+    <div style="background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 18px 24px; margin-bottom: 30px; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <strong style="color: #0056b3; font-size: 1rem; display: block; margin-bottom: 4px;">✨ Direct Factory Supply & Wholesale Quotations</strong>
+        <span style="font-size: 0.88rem; color: #475569;">We tailor quotations for retail buyers, commercial institutions, and wholesale distributor cartons across Pakistan.</span>
       </div>
-      <div class="shipping-bar" style="height: 8px;">
-        <div class="shipping-fill" id="cartPageShippingBar"></div>
-      </div>
+      <a href="https://wa.me/923006458707" target="_blank" rel="noopener" class="btn btn-sm" style="background: #25d366; color: #fff; font-weight: 700; text-decoration: none; padding: 8px 16px; border-radius: 8px;">
+        📞 Call Sales: 0300 6458707
+      </a>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr; gap: 32px;" id="cartPageGrid">
@@ -82,48 +82,33 @@
         <!-- Injected via JavaScript -->
       </div>
 
-      <!-- Order Summary Card -->
+      <!-- Quote Request Action Card -->
       <aside style="background: #ffffff; border-radius: 18px; border: 1px solid #e2e8f0; padding: 28px; box-shadow: var(--shadow-sm); height: fit-content;">
-        <h3 style="font-size: 1.3rem; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">Order Summary</h3>
+        <h3 style="font-size: 1.3rem; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">Request Quotation</h3>
+        <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
+          Submit your selected products to receive competitive retail rates, master carton discounts, and delivery timelines.
+        </p>
 
-        <!-- Promo Code Input -->
-        <div style="margin-bottom: 24px;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">Have a Promo Coupon?</label>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="couponCodeInput" class="form-control" placeholder="Try RUXWELCOME10" style="text-transform: uppercase;">
-            <button class="btn btn-secondary" id="applyCouponBtn" style="white-space: nowrap;">Apply</button>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.92rem; margin-bottom: 8px;">
+            <span style="color: #64748b;">Selected Products:</span>
+            <strong id="summaryItemCount" style="color: #0f172a;">0 Items</strong>
           </div>
-          <div id="couponMessage" style="font-size: 0.8rem; margin-top: 6px; font-weight: 600;"></div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; color: #64748b;">
-            <span>Subtotal:</span>
-            <strong id="summarySubtotal" style="color: #0f172a;">Rs. 0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; color: #059669;" id="summaryDiscountRow" style="display: none;">
-            <span>Coupon Discount:</span>
-            <strong id="summaryDiscount">- Rs. 0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; color: #64748b;">
-            <span>Estimated Shipping:</span>
-            <strong id="summaryShipping" style="color: #0f172a;">Rs. 150</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 800; color: var(--rux-blue); padding-top: 14px; border-top: 1px solid #e2e8f0; font-family: var(--font-heading);">
-            <span>Grand Total:</span>
-            <span id="summaryGrandTotal">Rs. 0</span>
+          <div style="display: flex; justify-content: space-between; font-size: 0.92rem;">
+            <span style="color: #64748b;">Pricing Status:</span>
+            <strong style="color: #0056b3;">Contact for Quote</strong>
           </div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
-          <a href="checkout.html" class="btn btn-primary btn-full btn-lg">
-            Proceed to Checkout 🔒
-          </a>
-          <button class="btn btn-whatsapp btn-full" onclick="window.open('https://wa.me/923006458707?text=' + ruxStore.buildWhatsAppCartMessage(), '_blank')">
-            <span>💬 Quick Order via WhatsApp</span>
+          <button class="btn btn-whatsapp btn-full btn-lg" onclick="ruxStore.submitWhatsAppQuoteRequest()">
+            <span>💬 Send Quote Request on WhatsApp</span>
           </button>
+          <a href="checkout.html" class="btn btn-primary btn-full">
+            Submit Online Inquiry Form ✉️
+          </a>
           <a href="shop.html" class="btn btn-secondary btn-full btn-sm">
-            ← Continue Shopping
+            ← Browse More Products
           </a>
         </div>
       </aside>
@@ -155,13 +140,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const listContainer = document.getElementById("cartListContainer");
-      const summarySubtotal = document.getElementById("summarySubtotal");
-      const summaryDiscount = document.getElementById("summaryDiscount");
-      const summaryDiscountRow = document.getElementById("summaryDiscountRow");
-      const summaryShipping = document.getElementById("summaryShipping");
-      const summaryGrandTotal = document.getElementById("summaryGrandTotal");
-      const shippingBar = document.getElementById("cartPageShippingBar");
-      const shippingText = document.getElementById("cartPageShippingText");
+      const summaryItemCount = document.getElementById("summaryItemCount");
 
       function renderCartPage() {
         const totals = ruxStore.getTotals();
@@ -169,25 +148,26 @@
         if (ruxStore.cart.length === 0) {
           listContainer.innerHTML = `
             <div style="text-align: center; padding: 60px 20px;">
-              <div style="font-size: 3.5rem; margin-bottom: 16px;">🛒</div>
-              <h3>Your cart is empty</h3>
-              <p style="color: #64748b; margin-top: 8px;">You haven't added any RUX cleaning products yet.</p>
-              <a href="shop.html" class="btn btn-primary" style="margin-top: 20px;">Shop Products Now</a>
+              <div style="font-size: 3.5rem; margin-bottom: 16px;">📋</div>
+              <h3>Your quote list is empty</h3>
+              <p style="color: #64748b; margin-top: 8px;">Explore our cleaning formulations and add items to request a custom price quote.</p>
+              <a href="shop.html" class="btn btn-primary" style="margin-top: 20px;">Browse Catalog Now</a>
             </div>
           `;
+          if (summaryItemCount) summaryItemCount.textContent = "0 Items";
         } else {
           listContainer.innerHTML = `
             <h3 style="font-size: 1.25rem; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
-              Cart Items (${totals.itemCount})
+              Selected Items for Quotation (${totals.itemCount})
             </h3>
             <div style="display: flex; flex-direction: column; gap: 16px;">
               ${ruxStore.cart.map((item, idx) => `
                 <div style="display: flex; align-items: center; gap: 16px; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; flex-wrap: wrap;">
-                  <img src="${item.image}" alt="${item.productName}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px; background: #f8fafc;">
+                  <img src="${item.image}" alt="${item.productName}" style="width: 70px; height: 70px; object-fit: contain; border-radius: 8px; background: #f8fafc; padding: 4px;">
                   <div style="flex-grow: 1; min-width: 180px;">
                     <a href="product.html?id=${item.productId}" style="font-weight: 700; font-size: 1rem; color: #0f172a;">${item.productName}</a>
-                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Variant: <strong>${item.variantLabel}</strong></div>
-                    <div style="font-size: 0.85rem; color: var(--rux-blue); font-weight: 700; margin-top: 4px;">Unit Price: Rs. ${item.unitPrice.toLocaleString()}</div>
+                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Variant / Size: <strong>${item.variantLabel}</strong></div>
+                    <div style="font-size: 0.85rem; color: var(--rux-blue); font-weight: 700; margin-top: 4px;">Pricing: Contact for Quote</div>
                   </div>
                   <div style="display: flex; align-items: center; gap: 14px;">
                     <div class="cart-qty-ctrl">
@@ -195,62 +175,20 @@
                       <span class="qty-val">${item.quantity}</span>
                       <button class="qty-btn" onclick="ruxStore.updateQuantity(${idx}, 1); renderCartPage();">+</button>
                     </div>
-                    <div style="font-weight: 800; font-size: 1.1rem; color: #0f172a; min-width: 90px; text-align: right;">
-                      Rs. ${(item.unitPrice * item.quantity).toLocaleString()}
-                    </div>
-                    <button onclick="ruxStore.removeFromCart(${idx}); renderCartPage();" style="color: #94a3b8; font-size: 1.1rem; padding: 4px;" title="Remove">✕</button>
+                    <button onclick="ruxStore.removeFromCart(${idx}); renderCartPage();" style="color: #94a3b8; font-size: 1.1rem; padding: 4px; border: none; background: transparent; cursor: pointer;" title="Remove">✕</button>
                   </div>
                 </div>
               `).join("")}
             </div>
             <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-              <button onclick="ruxStore.clearCart(); renderCartPage();" style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">
-                🗑️ Clear Entire Cart
+              <button onclick="ruxStore.clearCart(); renderCartPage();" style="color: #e11d48; font-size: 0.85rem; font-weight: 600; border: none; background: transparent; cursor: pointer;">
+                🗑️ Clear Entire List
               </button>
             </div>
           `;
-        }
-
-        // Summary Calculations
-        summarySubtotal.textContent = `Rs. ${totals.subtotal.toLocaleString()}`;
-        if (totals.discount > 0) {
-          summaryDiscountRow.style.display = "flex";
-          summaryDiscount.textContent = `- Rs. ${totals.discount.toLocaleString()}`;
-        } else {
-          summaryDiscountRow.style.display = "none";
-        }
-
-        summaryShipping.textContent = totals.shipping === 0 ? "FREE" : `Rs. ${totals.shipping}`;
-        summaryGrandTotal.textContent = `Rs. ${totals.total.toLocaleString()}`;
-
-        // Free Delivery Progress
-        const remaining = RUX_CONFIG.freeShippingThreshold - totals.subtotal;
-        if (remaining <= 0) {
-          shippingBar.style.width = "100%";
-          shippingText.innerHTML = `<span>🎉 <strong>FREE SHIPPING UNLOCKED!</strong> (Saved Rs. ${RUX_CONFIG.standardShippingFee})</span> <span>100%</span>`;
-        } else {
-          const pct = Math.min(100, Math.round((totals.subtotal / RUX_CONFIG.freeShippingThreshold) * 100));
-          shippingBar.style.width = `${pct}%`;
-          shippingText.innerHTML = `<span>Add <strong>Rs. ${remaining.toLocaleString()}</strong> more to get FREE Delivery!</span> <span>${pct}%</span>`;
+          if (summaryItemCount) summaryItemCount.textContent = `${totals.itemCount} Item(s)`;
         }
       }
-
-      // Coupon application
-      const couponInput = document.getElementById("couponCodeInput");
-      const applyBtn = document.getElementById("applyCouponBtn");
-      const couponMsg = document.getElementById("couponMessage");
-
-      applyBtn.addEventListener("click", () => {
-        const res = ruxStore.applyCoupon(couponInput.value);
-        if (res.success) {
-          couponMsg.style.color = "#059669";
-          couponMsg.textContent = `✓ ${res.message}`;
-        } else {
-          couponMsg.style.color = "#e11d48";
-          couponMsg.textContent = `✕ ${res.message}`;
-        }
-        renderCartPage();
-      });
 
       renderCartPage();
     });

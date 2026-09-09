@@ -2425,3 +2425,415 @@ p {
   }
 }
 
+/* ==========================================================================
+   BUTTON QUOTE WHATSAPP COMPONENT
+   ========================================================================== */
+.btn-quote-wa {
+  background: #25d366;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);
+  white-space: nowrap;
+}
+
+.btn-quote-wa:hover {
+  background: #1eb954;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.45);
+}
+
+.product-card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ==========================================================================
+   ENHANCED MOBILE & TOUCHSCREEN UI/UX PERFECTION
+   Optimized for 320px - 768px Viewports (iPhone SE, Pro, Max, Samsung Galaxy)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* 1. Ambient Soap Bubbles: Non-intrusive background only */
+  .glass-bubble {
+    pointer-events: none !important;
+    opacity: 0.22 !important;
+  }
+  .interactive-bubble {
+    display: none !important;
+  }
+
+  /* 2. Floating Widgets: Clean Non-Overlapping Mobile Stacking */
+  .floating-whatsapp {
+    bottom: 18px !important;
+    right: 16px !important;
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.6rem !important;
+    z-index: 999 !important;
+    box-shadow: 0 8px 22px rgba(37, 211, 102, 0.45) !important;
+  }
+
+  .rux-back-to-top {
+    bottom: 78px !important;
+    right: 18px !important;
+    width: 44px !important;
+    height: 44px !important;
+    z-index: 998 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  .rux-back-to-top .arrow-up {
+    font-size: 1rem !important;
+  }
+
+  /* 3. Top Announcement Bar: Clean Single Line */
+  .top-bar {
+    padding: 6px 0 !important;
+    font-size: 0.76rem !important;
+  }
+  .top-bar-content {
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 6px !important;
+  }
+  .top-bar-right {
+    display: none !important;
+  }
+
+  /* 4. Header: Clean Spacing & Touch Friendly */
+  .header-container {
+    padding: 10px 16px !important;
+  }
+  .logo-img {
+    height: 42px !important;
+  }
+  .mobile-menu-toggle {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 10px !important;
+  }
+
+  /* 5. Hero Section Mobile Optimization */
+  .hero-section {
+    padding: 30px 0 45px !important;
+  }
+  .hero-title {
+    font-size: 1.85rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 14px !important;
+  }
+  .hero-desc {
+    font-size: 0.92rem !important;
+    margin-bottom: 20px !important;
+  }
+  .hero-cta-group {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-bottom: 24px !important;
+  }
+  .hero-cta-group .btn {
+    width: 100% !important;
+    padding: 13px 20px !important;
+    font-size: 0.95rem !important;
+    justify-content: center !important;
+  }
+  .hero-trust-row {
+    justify-content: center !important;
+    gap: 12px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* 6. Swipeable Horizontal Category Chips */
+  .category-chips {
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 4px 16px 12px !important;
+    margin: 0 -16px 20px -16px !important;
+    scrollbar-width: none !important;
+  }
+  .category-chips::-webkit-scrollbar {
+    display: none !important;
+  }
+  .category-chip {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding: 7px 15px !important;
+    font-size: 0.82rem !important;
+  }
+
+  /* 7. Product Cards on 2-Column Mobile Screens */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .product-card {
+    border-radius: var(--radius-md) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .product-card-top {
+    aspect-ratio: 1/1 !important;
+  }
+  .product-img {
+    padding: 8px !important;
+  }
+  .product-card-body {
+    padding: 10px 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+  }
+  .product-cat {
+    font-size: 0.68rem !important;
+    margin-bottom: 2px !important;
+  }
+  .product-name {
+    font-size: 0.85rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 4px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    min-height: 2.15rem !important;
+  }
+  .product-rating {
+    font-size: 0.72rem !important;
+    margin-bottom: 6px !important;
+  }
+  .product-size-pills {
+    margin-bottom: 8px !important;
+    gap: 3px !important;
+  }
+  .size-pill {
+    font-size: 0.65rem !important;
+    padding: 2px 5px !important;
+  }
+  .product-card-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+    padding-top: 8px !important;
+    margin-top: auto !important;
+  }
+  .product-card-footer .price-wrap {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .product-card-footer .current-price {
+    font-size: 0.82rem !important;
+    display: block !important;
+    text-align: center !important;
+  }
+  .product-card-actions {
+    display: flex !important;
+    width: 100% !important;
+    gap: 5px !important;
+  }
+  .btn-quote-wa {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 7px 8px !important;
+    font-size: 0.72rem !important;
+    border-radius: 6px !important;
+  }
+  .btn-notify-wa {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 7px 8px !important;
+    font-size: 0.72rem !important;
+    border-radius: 6px !important;
+  }
+  .cart-add-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 1.05rem !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* 8. Spotlight Cards on Mobile */
+  .spotlight-card-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .spotlight-card-footer > div:first-child {
+    text-align: center !important;
+  }
+  .spotlight-card-footer > div:last-child {
+    display: flex !important;
+    width: 100% !important;
+    gap: 6px !important;
+  }
+  .spotlight-card-footer .btn {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 10px 14px !important;
+    font-size: 0.88rem !important;
+  }
+  .spotlight-card-footer .cart-add-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+  }
+
+  /* 9. Wholesale Calculator on Mobile */
+  .wholesale-section {
+    padding: 45px 0 !important;
+  }
+  .calc-card {
+    padding: 18px 16px !important;
+  }
+  .calc-btn-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  .calc-btn-row .btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 13px 16px !important;
+    font-size: 0.92rem !important;
+  }
+
+  /* 10. Product Detail Page (PDP) Mobile Layout */
+  .pdp-section {
+    padding: 20px 0 50px !important;
+  }
+  .pdp-grid {
+    gap: 24px !important;
+  }
+  .pdp-main-img-wrap {
+    aspect-ratio: 1/1 !important;
+    border-radius: var(--radius-lg) !important;
+  }
+  .pdp-thumbs {
+    gap: 8px !important;
+    padding-bottom: 6px !important;
+  }
+  .pdp-thumb {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  .pdp-details h1 {
+    font-size: 1.45rem !important;
+    line-height: 1.25 !important;
+  }
+  .pdp-sku-row {
+    gap: 8px !important;
+    font-size: 0.78rem !important;
+    margin-bottom: 12px !important;
+  }
+  .pdp-quote-wrap {
+    padding: 14px 16px !important;
+  }
+  .pdp-quote-wrap > div:nth-child(2) {
+    font-size: 1.5rem !important;
+  }
+  
+  /* PDP Action Buttons Mobile Stack */
+  .pdp-action-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-bottom: 24px !important;
+  }
+  .pdp-qty-wrap {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    padding: 8px 14px !important;
+  }
+  .pdp-qty-label {
+    font-weight: 700 !important;
+    color: #475569 !important;
+    font-size: 0.88rem !important;
+  }
+  .pdp-qty-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  .pdp-qty-controls .qty-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1.1rem !important;
+    background: #fff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+  }
+  .pdp-qty-controls #pdpQtyVal {
+    min-width: 36px !important;
+    text-align: center !important;
+    font-weight: 800 !important;
+    font-size: 1rem !important;
+  }
+  .pdp-action-row .btn-whatsapp {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 14px 18px !important;
+    font-size: 1rem !important;
+    border-radius: 12px !important;
+  }
+  .pdp-action-row #pdpAddToCartBtn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 13px 18px !important;
+    font-size: 0.95rem !important;
+    border-radius: 12px !important;
+  }
+  #pdpAddCartonBtn {
+    padding: 12px 16px !important;
+    font-size: 0.9rem !important;
+    border-radius: 10px !important;
+  }
+
+  /* 11. Quick View Modal on Mobile */
+  .quick-view-modal {
+    padding: 10px !important;
+  }
+  .quick-view-content {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    border-radius: 18px !important;
+  }
+  .quick-view-content > div {
+    grid-template-columns: 1fr !important;
+    padding: 20px 16px !important;
+    gap: 20px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .products-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .product-img {
+    height: 180px !important;
+  }
+  .product-name {
+    font-size: 0.95rem !important;
+  }
+}
+
+

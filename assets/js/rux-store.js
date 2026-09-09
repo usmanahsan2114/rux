@@ -231,11 +231,11 @@ const RUX_PRODUCTS = [
     reviewCount: 0,
     variants: [
       {
-        volume: "1000ml",
-        label: "1000ml Spray Bottle (Coming Soon)",
+        volume: "750ml",
+        label: "750ml Trigger Spray (Coming Soon)",
         price: 450,
         originalPrice: 550,
-        cartonSize: "12 X 1000ml",
+        cartonSize: "12 X 750ml",
         cartonPrice: 4800,
         cartonRetailTotal: 5400,
         manufacturingPrice: 320
@@ -245,7 +245,7 @@ const RUX_PRODUCTS = [
       "Boosts solar PV panel generation efficiency",
       "Anti-static shield repels airborne dust",
       "Non-corrosive to aluminum frames",
-      "Coming soon in 1000ml and 2.5L canisters"
+      "Streak-free finish with instant shine"
     ],
     usage: "Formulation completing soon.",
     safety: "Store in cool place."
@@ -266,11 +266,11 @@ const RUX_PRODUCTS = [
     reviewCount: 0,
     variants: [
       {
-        volume: "1000ml",
-        label: "1000ml Concentrated Jug (Coming Soon)",
+        volume: "2L",
+        label: "2L Value Jug (Coming Soon)",
         price: 350,
         originalPrice: 420,
-        cartonSize: "12 X 1000ml",
+        cartonSize: "6 X 2L",
         cartonPrice: 3700,
         cartonRetailTotal: 4200,
         manufacturingPrice: 240
@@ -279,8 +279,8 @@ const RUX_PRODUCTS = [
     features: [
       "Deep fiber stain-lift enzyme technology",
       "Color-lock protection against fabric fading",
-      "Concentrated formula for 25+ wash loads",
-      "Coming soon to all stores"
+      "Concentrated formula for 50+ wash loads",
+      "Gentle on delicate fabrics & skin"
     ],
     usage: "Formulation completing soon.",
     safety: "Keep out of reach of children."

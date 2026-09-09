@@ -27,6 +27,7 @@ const RUX_PRODUCTS = [
     shortDesc: "Advanced antibacterial formula that eliminates 99.9% of germs while restoring sparkling mirror-shine to marble, tile, wood, granite, and kitchen surfaces without sticky residue.",
     images: [
       "assets/images/products/rux-multi-surface-studio.webp",
+      "assets/images/products/rux-multi-surface-lifestyle.webp",
       "assets/images/products/rux-home-bundle-studio.webp"
     ],
     rating: 4.9,
@@ -63,6 +64,7 @@ const RUX_PRODUCTS = [
     shortDesc: "Thick clinging power formula that dissolves stubborn yellow stains, heavy limescale, and rust rings. Angled nozzle design reaches deep under the rim for 360-degree germ elimination.",
     images: [
       "assets/images/products/rux-toilet-cleaner-studio.webp",
+      "assets/images/products/rux-toilet-cleaner-lifestyle.webp",
       "assets/images/products/rux-home-bundle-studio.webp"
     ],
     rating: 4.95,
@@ -109,6 +111,7 @@ const RUX_PRODUCTS = [
     shortDesc: "Super concentrated lemon-fresh degreasing liquid that cuts burnt-on oil and food crust in seconds. Gentle on hands while leaving glassware and cutlery sparkling clean with zero white streaks.",
     images: [
       "assets/images/products/rux-dishwash-studio.webp",
+      "assets/images/products/rux-dishwash-lifestyle.webp",
       "assets/images/products/rux-home-bundle-studio.webp"
     ],
     rating: 4.88,
@@ -155,6 +158,7 @@ const RUX_PRODUCTS = [
     shortDesc: "The ultimate liquid whitener (Neela) formulated with optical brightening micro-pigments. Restores bright white brilliance to school uniforms, shirts, shalwar kameez, and cotton linens.",
     images: [
       "assets/images/products/rux-blue-studio.webp",
+      "assets/images/products/rux-blue-lifestyle.webp",
       "assets/images/products/rux-home-bundle-studio.webp"
     ],
     rating: 4.92,
@@ -190,7 +194,8 @@ const RUX_PRODUCTS = [
     tagline: "Sticker Design Finalized • Product Formulation in Progress",
     shortDesc: "Final packaging sticker approved. Advanced hospital-grade multi-surface disinfectant and germicidal bleach. Formula undergoing final laboratory certification.",
     images: [
-      "assets/images/products/rux-bleach-studio.webp"
+      "assets/images/products/rux-bleach-studio.webp",
+      "assets/images/products/rux-bleach-lifestyle.webp"
     ],
     rating: 0,
     reviewCount: 0,
@@ -225,7 +230,8 @@ const RUX_PRODUCTS = [
     tagline: "Photovoltaic Efficiency Optimization (In Lab Formulation)",
     shortDesc: "Specialized anti-static solar panel cleaning solution currently in final formulation. Engineered to boost solar power output without degrading anti-reflective coatings.",
     images: [
-      "assets/images/products/rux-solar-cleaner.webp"
+      "assets/images/products/rux-solar-cleaner.webp",
+      "assets/images/products/rux-solar-cleaner-lifestyle.webp"
     ],
     rating: 0,
     reviewCount: 0,
@@ -260,7 +266,8 @@ const RUX_PRODUCTS = [
     tagline: "Deep Fiber Stain Removal Formulation (In Lab Formulation)",
     shortDesc: "High-potency laundry liquid detergent with active stain lift enzymes. Final laboratory trials in progress for superior fabric care.",
     images: [
-      "assets/images/products/rux-washing-liquid.webp"
+      "assets/images/products/rux-washing-liquid.webp",
+      "assets/images/products/rux-washing-liquid-lifestyle.webp"
     ],
     rating: 0,
     reviewCount: 0,
@@ -296,11 +303,10 @@ const RUX_PRODUCTS = [
     shortDesc: "Get the complete official RUX launch lineup: 1x Multi Surface Cleaner (1000ml), 1x Toilet Bowl Cleaner (500ml), 1x Lemon Dishwash (500ml), and 1x Blue Fabric Whitener (150ml) PLUS FREE microfiber cloth!",
     images: [
       "assets/images/products/rux-home-bundle-studio.webp",
-      "assets/images/products/rux-multi-surface-studio.webp",
-      "assets/images/products/rux-toilet-cleaner-studio.webp",
-      "assets/images/products/rux-dishwash-studio.webp",
-      "assets/images/products/rux-blue-studio.webp",
-      "assets/images/rux-hero-banner.webp"
+      "assets/images/products/rux-multi-surface-lifestyle.webp",
+      "assets/images/products/rux-dishwash-lifestyle.webp",
+      "assets/images/products/rux-toilet-cleaner-lifestyle.webp",
+      "assets/images/products/rux-blue-lifestyle.webp"
     ],
     rating: 5.0,
     reviewCount: 310,

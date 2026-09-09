@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RUX Studio Asset Production Engine</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #fff; padding: 30px; }
+    .canvas-wrap { display: inline-block; margin: 15px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; }
+    h3 { margin-top: 0; font-size: 14px; color: #38bdf8; }
+    canvas { display: block; border-radius: 8px; max-width: 320px; height: auto; }
+    #statusLog { background: #020617; border: 1px solid #1e293b; padding: 16px; border-radius: 10px; font-family: monospace; font-size: 13px; color: #4ade80; max-height: 250px; overflow-y: auto; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>RUX Commercial Studio Packshot & Banner Generator</h1>
+  <p>Compositing real packaging photography into professional studio advertising assets...</p>
+  <div id="statusLog">Initializing asset pipeline...<br></div>
+
+  <div id="canvasesContainer"></div>
+
+  <script>
+    const logEl = document.getElementById('statusLog');
+    function log(msg) {
+      logEl.innerHTML += msg + '<br>';
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(msg);
+    }
+
+    async function postImage(targetPath, dataUrl) {
+      const res = await fetch('/save-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetPath, dataUrl })
+      });
+      const data = await res.json();
+      if (data.success) {
+        log(`✓ Successfully saved: ${targetPath}`);
+      } else {
+        log(`✗ Error saving ${targetPath}: ${data.error}`);
+      }
+      return data;
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = (e) => reject(new Error('Failed to load image: ' + src));
+        img.src = src;
+      });
+    }
+
+    // High-precision silhouette and chroma extraction
+    function extractBottleCutout(img, type) {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth || img.width;
+      c.height = img.naturalHeight || img.height;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      const idata = ctx.getImageData(0, 0, c.width, c.height);
+      const data = idata.data;
+      const w = c.width;
+      const h = c.height;
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+          const maxVal = Math.max(r, g, b);
+          const minVal = Math.min(r, g, b);
+          const sat = (maxVal - minVal) / (maxVal + 0.001);
+          const brightness = (r + g + b) / 3;
+
+          let isInsideBottle = false;
+
+          if (type === 'dish') {
+            const inCapY = (y >= 90 && y <= 440);
+            const inCapX = (x >= 475 && x <= 725);
+            const inBodyY = (y > 440 && y <= 1530);
+            const inBodyX = (x >= 250 && x <= 950);
+            const inLabel = (y >= 780 && y <= 1430 && x >= 360 && x <= 840);
+
+            if ((inCapY && inCapX) || (inBodyY && inBodyX)) {
+              if (inLabel) {
+                isInsideBottle = true;
+              } else if (sat >= 0.16) {
+                // Vibrant yellow dishwash liquid or sticker color
+                isInsideBottle = true;
+              } else if (inCapY && inCapX && brightness > 100 && brightness < 240) {
+                // White translucent pull-push cap
+                isInsideBottle = true;
+              } else if (inBodyY && inBodyX && x >= 320 && x <= 880 && brightness > 90 && brightness < 220) {
+                isInsideBottle = true;
+              }
+            }
+          } else if (type === 'surface') {
+            const inCapY = (y >= 35 && y <= 220);
+            const inCapX = (x >= 490 && x <= 680);
+            const inNeckY = (y > 220 && y <= 450);
+            const inNeckX = (x >= 410 && x <= 760);
+            const inBodyY = (y > 450 && y <= 1550);
+            const inBodyX = (x >= 380 && x <= 820);
+            const inLabel = (y >= 650 && y <= 1120 && x >= 400 && x <= 790);
+
+            if ((inCapY && inCapX) || (inNeckY && inNeckX) || (inBodyY && inBodyX)) {
+              if (inLabel) {
+                isInsideBottle = true;
+              } else if (inCapY && (r > g + 35 && r > b + 35)) {
+                isInsideBottle = true; // Red cap
+              } else if (inBodyY && (r > g + 10)) {
+                isInsideBottle = true; // Pink surface cleaner liquid
+              } else if (inNeckY && x >= 460 && x <= 720 && brightness < 230) {
+                isInsideBottle = true; // Translucent bottle shoulder
+              } else if (sat >= 0.15) {
+                isInsideBottle = true;
+              }
+            }
+          } else if (type === 'toilet') {
+            const inCapY = (y >= 15 && y <= 280);
+            const inCapX = (x >= 540 && x <= 830);
+            const inBodyY = (y > 280 && y <= 1520);
+            const inBodyX = (x >= 390 && x <= 970);
+            const inLabel = (y >= 630 && y <= 1320 && x >= 450 && x <= 880);
+
+            if ((inCapY && inCapX) || (inBodyY && inBodyX)) {
+              if (inLabel) {
+                isInsideBottle = true;
+              } else if (inCapY && (r > g + 35 && r > b + 35)) {
+                isInsideBottle = true; // Red nozzle cap
+              } else if (inBodyY && (b > r + 15 && b > g + 5)) {
+                isInsideBottle = true; // Royal blue bottle body
+              } else if (sat >= 0.2) {
+                isInsideBottle = true;
+              }
+            }
+          } else if (type === 'blue') {
+            if (y >= 35 && y <= 275 && x >= 50 && x <= 165) {
+              const inLabel = (y >= 130 && y <= 250 && x >= 60 && x <= 155);
+              if (inLabel) {
+                isInsideBottle = true;
+              } else if (r > g + 20 && r > b + 20 && y <= 85) {
+                isInsideBottle = true; // Red flip cap
+              } else if (b > r + 12 && b > g + 12) {
+                isInsideBottle = true; // Blue cylindrical bottle body
+              } else if (sat >= 0.18) {
+                isInsideBottle = true;
+              }
+            }
+          }
+
+          if (!isInsideBottle) {
+            data[idx + 3] = 0; // Transparent
+          }
+        }
+      }
+
+      // Smooth edge feathering (2-pass alpha anti-aliasing)
+      const alphaCopy = new Uint8Array(w * h);
+      for (let i = 0; i < w * h; i++) alphaCopy[i] = data[i * 4 + 3];
+
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const i = y * w + x;
+          if (alphaCopy[i] === 0) {
+            // Check if neighboring bottle pixel
+            let solidCount = 0;
+            if (alphaCopy[i - 1] === 255) solidCount++;
+            if (alphaCopy[i + 1] === 255) solidCount++;
+            if (alphaCopy[i - w] === 255) solidCount++;
+            if (alphaCopy[i + w] === 255) solidCount++;
+            if (solidCount >= 2) {
+              data[i * 4 + 3] = 160;
+              // Sample neighboring color
+              data[i * 4] = data[(i - 1) * 4] || data[(i + 1) * 4];
+              data[i * 4 + 1] = data[(i - 1) * 4 + 1] || data[(i + 1) * 4 + 1];
+              data[i * 4 + 2] = data[(i - 1) * 4 + 2] || data[(i + 1) * 4 + 2];
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(idata, 0, 0);
+      return c;
+    }
+
+    // Helper: Draw luxury contact shadow and floor reflection
+    function drawProductBase(ctx, bottleCanvas, x, y, width, height, shadowColor = 'rgba(0, 30, 60, 0.28)') {
+      ctx.save();
+      // 1. Soft Contact Shadow
+      const shadowY = y + height - 12;
+      const shadowGrad = ctx.createRadialGradient(x + width / 2, shadowY, width * 0.1, x + width / 2, shadowY, width * 0.55);
+      shadowGrad.addColorStop(0, shadowColor);
+      shadowGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0.12)');
+      shadowGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = shadowGrad;
+      ctx.beginPath();
+      ctx.ellipse(x + width / 2, shadowY, width * 0.52, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Glossy Floor Reflection
+      ctx.save();
+      ctx.translate(0, (y + height) * 2);
+      ctx.scale(1, -1);
+      ctx.globalAlpha = 0.22;
+      ctx.drawImage(bottleCanvas, x, y, width, height);
+
+      // Reflection fadeout mask
+      ctx.globalCompositeOperation = 'destination-out';
+      const refFade = ctx.createLinearGradient(0, y + height, 0, y + height + 180);
+      refFade.addColorStop(0, 'rgba(0,0,0,0)');
+      refFade.addColorStop(1, 'rgba(0,0,0,1)');
+      ctx.fillStyle = refFade;
+      ctx.fillRect(x - 20, y + height, width + 40, height);
+      ctx.restore();
+
+      // 3. Draw Actual Bottle
+      ctx.drawImage(bottleCanvas, x, y, width, height);
+      ctx.restore();
+    }
+
+    // Helper: Draw floating sparkle
+    function drawSparkle(ctx, x, y, size = 18, color = '#ffffff') {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.shadowColor = '#00b4d8';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(x, y - size);
+      ctx.quadraticCurveTo(x, y, x + size, y);
+      ctx.quadraticCurveTo(x, y, x, y + size);
+      ctx.quadraticCurveTo(x, y, x - size, y);
+      ctx.quadraticCurveTo(x, y, x, y - size);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Helper: Draw iridescent soap bubble on canvas
+    function drawCanvasBubble(ctx, x, y, r) {
+      ctx.save();
+      const grad = ctx.createRadialGradient(x - r*0.35, y - r*0.35, r*0.1, x, y, r);
+      grad.addColorStop(0, 'rgba(255,255,255,0.85)');
+      grad.addColorStop(0.3, 'rgba(0,180,216,0.25)');
+      grad.addColorStop(0.7, 'rgba(16,185,129,0.18)');
+      grad.addColorStop(1, 'rgba(255,255,255,0.4)');
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Highlight point
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(x - r*0.32, y - r*0.32, r*0.22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    async function runProduction() {
+      try {
+        log('Loading real packaging source images...');
+        const [
+          imgSurfBottle, imgSurfSticker,
+          imgDishBottle, imgDishSticker,
+          imgToiletBottle, imgToiletSticker,
+          imgBlueBottle, imgBlueSticker,
+          imgBleachSticker
+        ] = await Promise.all([
+          loadImage('assets/images/packaging/surface-cleaner-bottle.png'),
+          loadImage('assets/images/packaging/surface-cleaner.png'),
+          loadImage('assets/images/packaging/dishwasher-bottle.png'),
+          loadImage('assets/images/packaging/dishwasher.png'),
+          loadImage('assets/images/packaging/toilet-cleaner-bottle.png'),
+          loadImage('assets/images/packaging/toilet-cleaner.png'),
+          loadImage('assets/images/packaging/blue-bottle.png'),
+          loadImage('assets/images/packaging/blue.png'),
+          loadImage('assets/images/packaging/bleech.png')
+        ]);
+
+        log('Extracting high-precision clean bottle cutouts...');
+        const cutSurf = extractBottleCutout(imgSurfBottle);
+        const cutDish = extractBottleCutout(imgDishBottle);
+        const cutToilet = extractBottleCutout(imgToiletBottle);
+        const cutBlue = extractBottleCutout(imgBlueBottle);
+
+        // ==========================================
+        // 1. RUX MULTI SURFACE CLEANER (1000ml)
+        // ==========================================
+        log('Rendering Studio Packshot: RUX Multi Surface Cleaner...');
+        const c1 = document.createElement('canvas');
+        c1.width = 1000; c1.height = 1000;
+        const ctx1 = c1.getContext('2d');
+
+        // Studio cyc background: cool soft white/cyan-slate
+        const bg1 = ctx1.createLinearGradient(0, 0, 0, 1000);
+        bg1.addColorStop(0, '#f8fafc');
+        bg1.addColorStop(0.65, '#e2e8f0');
+        bg1.addColorStop(0.66, '#cbd5e1'); // Floor line
+        bg1.addColorStop(1, '#ffffff');
+        ctx1.fillStyle = bg1;
+        ctx1.fillRect(0, 0, 1000, 1000);
+
+        // Studio softbox radial glow
+        const glow1 = ctx1.createRadialGradient(500, 420, 80, 500, 420, 500);
+        glow1.addColorStop(0, 'rgba(255, 230, 240, 0.45)');
+        glow1.addColorStop(0.6, 'rgba(0, 180, 216, 0.1)');
+        glow1.addColorStop(1, 'transparent');
+        ctx1.fillStyle = glow1;
+        ctx1.fillRect(0, 0, 1000, 660);
+
+        // Render Bottle
+        drawProductBase(ctx1, cutSurf, 350, 140, 300, 720);
+
+        // Studio Sparkles & Accents
+        drawSparkle(ctx1, 330, 280, 16, '#ffffff');
+        drawSparkle(ctx1, 670, 390, 20, '#ff69b4');
+        drawSparkle(ctx1, 480, 680, 14, '#ffffff');
+        drawCanvasBubble(ctx1, 280, 220, 24);
+        drawCanvasBubble(ctx1, 710, 280, 32);
+        drawCanvasBubble(ctx1, 680, 620, 18);
+
+        // Commercial Badge
+        ctx1.fillStyle = '#db2777';
+        ctx1.font = 'bold 22px system-ui, sans-serif';
+        ctx1.fillText('1000ml VALUE PACK', 50, 70);
+        ctx1.fillStyle = '#64748b';
+        ctx1.font = '600 16px system-ui, sans-serif';
+        ctx1.fillText('Kills 99.9% Germs • Floors, Tiles, Counters', 50, 98);
+
+        await postImage('assets/images/products/rux-multi-surface-studio.jpg', c1.toDataURL('image/jpeg', 0.94));
+
+        // ==========================================
+        // 2. RUX LEMON DISHWASH LIQUID (500ml / 300ml)
+        // ==========================================
+        log('Rendering Studio Packshot: RUX Dishwash Liquid...');
+        const c2 = document.createElement('canvas');
+        c2.width = 1000; c2.height = 1000;
+        const ctx2 = c2.getContext('2d');
+
+        const bg2 = ctx2.createLinearGradient(0, 0, 0, 1000);
+        bg2.addColorStop(0, '#fefce8');
+        bg2.addColorStop(0.65, '#fef08a');
+        bg2.addColorStop(0.66, '#e2e8f0');
+        bg2.addColorStop(1, '#ffffff');
+        ctx2.fillStyle = bg2;
+        ctx2.fillRect(0, 0, 1000, 1000);
+
+        const glow2 = ctx2.createRadialGradient(500, 440, 90, 500, 440, 520);
+        glow2.addColorStop(0, 'rgba(250, 204, 21, 0.45)');
+        glow2.addColorStop(0.7, 'rgba(255, 255, 255, 0.2)');
+        glow2.addColorStop(1, 'transparent');
+        ctx2.fillStyle = glow2;
+        ctx2.fillRect(0, 0, 1000, 660);
+
+        // Render Bottle
+        drawProductBase(ctx2, cutDish, 325, 120, 350, 740, 'rgba(161, 98, 7, 0.35)');
+
+        // Sparkles & Bubbles
+        drawSparkle(ctx2, 310, 290, 18, '#ffffff');
+        drawSparkle(ctx2, 690, 320, 22, '#eab308');
+        drawCanvasBubble(ctx2, 260, 240, 28);
+        drawCanvasBubble(ctx2, 730, 260, 35);
+        drawCanvasBubble(ctx2, 690, 580, 20);
+
+        ctx2.fillStyle = '#ca8a04';
+        ctx2.font = 'bold 22px system-ui, sans-serif';
+        ctx2.fillText('LEMON ACTIVE FORMULA', 50, 70);
+        ctx2.fillStyle = '#64748b';
+        ctx2.font = '600 16px system-ui, sans-serif';
+        ctx2.fillText('Cuts Tough Grease • Sparkling Shine', 50, 98);
+
+        await postImage('assets/images/products/rux-dishwash-studio.jpg', c2.toDataURL('image/jpeg', 0.94));
+
+        // ==========================================
+        // 3. RUX TOILET BOWL CLEANER (500ml / 250ml)
+        // ==========================================
+        log('Rendering Studio Packshot: RUX Toilet Bowl Cleaner...');
+        const c3 = document.createElement('canvas');
+        c3.width = 1000; c3.height = 1000;
+        const ctx3 = c3.getContext('2d');
+
+        const bg3 = ctx3.createLinearGradient(0, 0, 0, 1000);
+        bg3.addColorStop(0, '#f0f9ff');
+        bg3.addColorStop(0.65, '#bae6fd');
+        bg3.addColorStop(0.66, '#cbd5e1');
+        bg3.addColorStop(1, '#ffffff');
+        ctx3.fillStyle = bg3;
+        ctx3.fillRect(0, 0, 1000, 1000);
+
+        const glow3 = ctx3.createRadialGradient(500, 440, 90, 500, 440, 520);
+        glow3.addColorStop(0, 'rgba(0, 86, 179, 0.25)');
+        glow3.addColorStop(0.7, 'rgba(0, 180, 216, 0.15)');
+        glow3.addColorStop(1, 'transparent');
+        ctx3.fillStyle = glow3;
+        ctx3.fillRect(0, 0, 1000, 660);
+
+        // Render Bottle
+        drawProductBase(ctx3, cutToilet, 335, 120, 330, 740, 'rgba(0, 56, 115, 0.38)');
+
+        drawSparkle(ctx3, 310, 240, 20, '#ffffff');
+        drawSparkle(ctx3, 680, 360, 24, '#00b4d8');
+        drawCanvasBubble(ctx3, 270, 310, 26);
+        drawCanvasBubble(ctx3, 710, 250, 34);
+
+        ctx3.fillStyle = '#0056b3';
+        ctx3.font = 'bold 22px system-ui, sans-serif';
+        ctx3.fillText('POWERFUL DISINFECTING ACTION', 50, 70);
+        ctx3.fillStyle = '#64748b';
+        ctx3.font = '600 16px system-ui, sans-serif';
+        ctx3.fillText('Removes Limescale & Stains • 99.9% Germ Protection', 50, 98);
+
+        await postImage('assets/images/products/rux-toilet-cleaner-studio.jpg', c3.toDataURL('image/jpeg', 0.94));
+
+        // ==========================================
+        // 4. RUX BLUE FABRIC WHITENER (150ml)
+        // ==========================================
+        log('Rendering Studio Packshot: RUX Blue Fabric Whitener...');
+        const c4 = document.createElement('canvas');
+        c4.width = 1000; c4.height = 1000;
+        const ctx4 = c4.getContext('2d');
+
+        const bg4 = ctx4.createLinearGradient(0, 0, 0, 1000);
+        bg4.addColorStop(0, '#eff6ff');
+        bg4.addColorStop(0.65, '#bfdbfe');
+        bg4.addColorStop(0.66, '#cbd5e1');
+        bg4.addColorStop(1, '#ffffff');
+        ctx4.fillStyle = bg4;
+        ctx4.fillRect(0, 0, 1000, 1000);
+
+        const glow4 = ctx4.createRadialGradient(500, 440, 80, 500, 440, 480);
+        glow4.addColorStop(0, 'rgba(37, 99, 235, 0.28)');
+        glow4.addColorStop(1, 'transparent');
+        ctx4.fillStyle = glow4;
+        ctx4.fillRect(0, 0, 1000, 660);
+
+        // Render Bottle (scaled nicely)
+        drawProductBase(ctx4, cutBlue, 360, 140, 280, 720, 'rgba(30, 58, 138, 0.4)');
+
+        drawSparkle(ctx4, 330, 280, 20, '#ffffff');
+        drawSparkle(ctx4, 660, 340, 22, '#38bdf8');
+        drawCanvasBubble(ctx4, 290, 260, 26);
+        drawCanvasBubble(ctx4, 690, 290, 32);
+
+        ctx4.fillStyle = '#1d4ed8';
+        ctx4.font = 'bold 22px system-ui, sans-serif';
+        ctx4.fillText('FABRIC WHITENING DROPS', 50, 70);
+        ctx4.fillStyle = '#64748b';
+        ctx4.font = '600 16px system-ui, sans-serif';
+        ctx4.fillText('Ultra Brightness for White Clothes • Dazzling Radiance', 50, 98);
+
+        await postImage('assets/images/products/rux-blue-studio.jpg', c4.toDataURL('image/jpeg', 0.94));
+
+        // ==========================================
+        // 5. RUX BLEACH - COMING SOON TEASER (500ml)
+        // ==========================================
+        log('Rendering Teaser Packshot: RUX Bleach (Coming Soon)...');
+        const c5 = document.createElement('canvas');
+        c5.width = 1000; c5.height = 1000;
+        const ctx5 = c5.getContext('2d');
+
+        const bg5 = ctx5.createLinearGradient(0, 0, 0, 1000);
+        bg5.addColorStop(0, '#0284c7');
+        bg5.addColorStop(0.65, '#0369a1');
+        bg5.addColorStop(0.66, '#0f172a');
+        bg5.addColorStop(1, '#1e293b');
+        ctx5.fillStyle = bg5;
+        ctx5.fillRect(0, 0, 1000, 1000);
+
+        // Center the finalized sticker artwork
+        const stickerW = 440;
+        const stickerH = 540;
+        const sX = (1000 - stickerW) / 2;
+        const sY = 160;
+
+        // Sticker shadow
+        ctx5.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx5.shadowBlur = 35;
+        ctx5.drawImage(imgBleachSticker, sX, sY, stickerW, stickerH);
+        ctx5.shadowBlur = 0;
+
+        // Coming Soon Ribbon
+        ctx5.fillStyle = '#e11d48';
+        ctx5.beginPath();
+        ctx5.roundRect(280, 740, 440, 60, 30);
+        ctx5.fill();
+
+        ctx5.fillStyle = '#ffffff';
+        ctx5.font = 'bold 24px system-ui, sans-serif';
+        ctx5.textAlign = 'center';
+        ctx5.fillText('★ COMING SOON ★', 500, 778);
+        ctx5.font = '600 16px system-ui, sans-serif';
+        ctx5.fillStyle = '#94a3b8';
+        ctx5.fillText('Sticker Design Finalized • Lab Production in Progress', 500, 835);
+        ctx5.textAlign = 'left';
+
+        await postImage('assets/images/products/rux-bleach-studio.jpg', c5.toDataURL('image/jpeg', 0.94));
+
+        // ==========================================
+        // 6. HERO COMMERCIAL ADVERTISING BANNER (1400x700)
+        // ==========================================
+        log('Rendering Hero Commercial Banner featuring all 4 Launched Bottles...');
+        const cHero = document.createElement('canvas');
+        cHero.width = 1400; cHero.height = 700;
+        const ctxH = cHero.getContext('2d');
+
+        // Luxury background: Studio cyclorama with deep blue vignette
+        const heroBg = ctxH.createLinearGradient(0, 0, 0, 700);
+        heroBg.addColorStop(0, '#f1f5f9');
+        heroBg.addColorStop(0.62, '#cbd5e1');
+        heroBg.addColorStop(0.63, '#94a3b8'); // Countertop horizon
+        heroBg.addColorStop(1, '#ffffff');
+        ctxH.fillStyle = heroBg;
+        ctxH.fillRect(0, 0, 1400, 700);
+
+        // Soft atmospheric backlight
+        const heroGlow = ctxH.createRadialGradient(700, 350, 100, 700, 350, 680);
+        heroGlow.addColorStop(0, 'rgba(0, 180, 216, 0.35)');
+        heroGlow.addColorStop(0.5, 'rgba(0, 86, 179, 0.15)');
+        heroGlow.addColorStop(1, 'transparent');
+        ctxH.fillStyle = heroGlow;
+        ctxH.fillRect(0, 0, 1400, 440);
+
+        // Arrange the 4 Launched Bottles on the Countertop:
+        // Left: Dishwash Liquid (yellow)
+        drawProductBase(ctxH, cutDish, 120, 140, 260, 520, 'rgba(161, 98, 7, 0.32)');
+
+        // Center-Left: Multi Surface Cleaner 1000ml (tall pink)
+        drawProductBase(ctxH, cutSurf, 410, 100, 250, 560, 'rgba(190, 24, 93, 0.3)');
+
+        // Center-Right: Toilet Bowl Cleaner (royal blue with red cap)
+        drawProductBase(ctxH, cutToilet, 700, 110, 260, 550, 'rgba(0, 56, 115, 0.35)');
+
+        // Right: RUX Blue Fabric Whitener (blue cylindrical bottle)
+        drawProductBase(ctxH, cutBlue, 1000, 160, 230, 500, 'rgba(30, 58, 138, 0.38)');
+
+        // Floating soap bubbles across the banner
+        drawCanvasBubble(ctxH, 90, 120, 28);
+        drawCanvasBubble(ctxH, 370, 160, 24);
+        drawCanvasBubble(ctxH, 670, 110, 34);
+        drawCanvasBubble(ctxH, 980, 130, 30);
+        drawCanvasBubble(ctxH, 1280, 210, 36);
+        drawCanvasBubble(ctxH, 340, 540, 18);
+        drawCanvasBubble(ctxH, 1020, 560, 20);
+
+        // Cleanliness sparkles
+        drawSparkle(ctxH, 250, 220, 22, '#ffffff');
+        drawSparkle(ctxH, 540, 180, 24, '#ff69b4');
+        drawSparkle(ctxH, 830, 200, 26, '#00b4d8');
+        drawSparkle(ctxH, 1110, 240, 20, '#ffffff');
+        drawSparkle(ctxH, 700, 40, 28, '#38bdf8');
+
+        // Brand Banner Header Overlay
+        ctxH.fillStyle = 'rgba(0, 56, 115, 0.92)';
+        ctxH.font = 'bold 28px system-ui, sans-serif';
+        ctxH.textAlign = 'center';
+        ctxH.fillText('RUX CLEANING & SHINE • OFFICIAL LAUNCHED LINEUP', 700, 52);
+        ctxH.fillStyle = '#475569';
+        ctxH.font = '600 16px system-ui, sans-serif';
+        ctxH.fillText('4 Factory-Engineered Hygiene Solutions • Pure Formulations • TM # 768691', 700, 80);
+
+        await postImage('assets/images/rux-hero-banner.jpg', cHero.toDataURL('image/jpeg', 0.94));
+
+        log('🎉 ALL 6 COMMERCIAL STUDIO ASSETS PRODUCED & SAVED!');
+        log('You can now inspect the updated assets and storefront.');
+
+      } catch (err) {
+        log('❌ Production Error: ' + err.stack);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', runProduction);
+  </script>
+</body>
+</html>

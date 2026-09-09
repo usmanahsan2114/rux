@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RUX 3D Studio Production Engine</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0b0f19; color: #fff; margin: 0; padding: 25px; }
+    h1 { margin: 0 0 8px; font-size: 22px; color: #38bdf8; }
+    #log { background: #030712; border: 1px solid #1f2937; padding: 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #34d399; max-height: 180px; overflow-y: auto; margin-bottom: 20px; }
+    .render-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+    .render-card { background: #111827; padding: 12px; border-radius: 12px; border: 1px solid #374151; }
+    .render-card h4 { margin: 0 0 10px; font-size: 13px; color: #9ca3af; }
+    canvas { display: block; border-radius: 8px; max-width: 320px; height: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+  </style>
+  <script src="/assets/js/three.min.js"></script>
+</head>
+<body>
+  <h1>RUX 3D Commercial Product Studio Renderer</h1>
+  <p>Generating 100% production-quality 3D PBR studio packshots using exact sticker graphics...</p>
+  <div id="log">Initializing Three.js PBR Studio Engine...<br></div>
+
+  <div class="render-grid" id="renderGrid"></div>
+
+  <script>
+    const logEl = document.getElementById('log');
+    function log(msg) {
+      logEl.innerHTML += msg + '<br>';
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(msg);
+    }
+
+    async function postImage(targetPath, dataUrl) {
+      const res = await fetch('/save-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetPath, dataUrl })
+      });
+      const data = await res.json();
+      if (data.success) {
+        log(`✓ Saved: ${targetPath}`);
+      } else {
+        log(`✗ Error: ${data.error}`);
+      }
+    }
+
+    function loadTextureAsync(loader, url) {
+      return new Promise((resolve) => {
+        loader.load(url, (tex) => {
+          tex.generateMipmaps = true;
+          tex.minFilter = THREE.LinearMipmapLinearFilter;
+          tex.magFilter = THREE.LinearFilter;
+          tex.encoding = THREE.sRGBEncoding;
+          resolve(tex);
+        });
+      });
+    }
+
+    // Helper: Cylindrical curved label mapped directly on bottle front
+    function createCurvedLabel(stickerTex, width, height, radius, yPos) {
+      const geo = new THREE.PlaneGeometry(width, height, 32, 1);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const theta = x / radius;
+        pos.setX(i, radius * Math.sin(theta));
+        pos.setZ(i, radius * Math.cos(theta) - radius);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshStandardMaterial({
+        map: stickerTex,
+        transparent: true,
+        roughness: 0.28,
+        metalness: 0.02,
+        side: THREE.DoubleSide
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(0, yPos, radius + 0.02);
+      return mesh;
+    }
+
+    // Helper: Studio Lighting Setup
+    function setupStudioLighting(scene) {
+      const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+      scene.add(ambient);
+
+      // Key light: crisp softbox front-top-left
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+      keyLight.position.set(4, 7, 7);
+      scene.add(keyLight);
+
+      // Fill light: soft cool light from right
+      const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.7);
+      fillLight.position.set(-5, 4, 5);
+      scene.add(fillLight);
+
+      // Front specular spot for crystal bottle reflection
+      const frontSpot = new THREE.PointLight(0xffffff, 0.9, 15);
+      frontSpot.position.set(0, 3.8, 5);
+      scene.add(frontSpot);
+
+      // Rim / Back light: cyan highlight for contour definition
+      const rimLight = new THREE.DirectionalLight(0x00b4d8, 1.4);
+      rimLight.position.set(0, 6, -6);
+      scene.add(rimLight);
+    }
+
+    // Helper: Create Luxury Marble / Studio Countertop Plane
+    function createGroundPlane() {
+      const planeGeo = new THREE.PlaneGeometry(30, 30);
+      const planeMat = new THREE.MeshStandardMaterial({
+        color: 0xf1f5f9,
+        roughness: 0.2,
+        metalness: 0.05
+      });
+      const plane = new THREE.Mesh(planeGeo, planeMat);
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.y = -0.01;
+      return plane;
+    }
+
+    // 1. BUILD MULTI SURFACE CLEANER (1000ml)
+    function buildMultiSurfaceBottle(stickerTex) {
+      const group = new THREE.Group();
+
+      // Translucent vibrant pink liquid inside ribbed bottle
+      const points = [
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(1.18, 0.05),
+        new THREE.Vector2(1.24, 0.4),
+        new THREE.Vector2(1.24, 4.3),
+        new THREE.Vector2(1.15, 4.7),
+        new THREE.Vector2(0.85, 5.3),
+        new THREE.Vector2(0.55, 5.8),
+        new THREE.Vector2(0.42, 6.2),
+        new THREE.Vector2(0.42, 6.5),
+        new THREE.Vector2(0, 6.5)
+      ];
+      const bottleGeo = new THREE.LatheGeometry(points, 64);
+      const bottleMat = new THREE.MeshStandardMaterial({
+        color: 0xff3875, // Rich translucent pink
+        roughness: 0.12,
+        metalness: 0.08,
+        transparent: true,
+        opacity: 0.9
+      });
+      const bottle = new THREE.Mesh(bottleGeo, bottleMat);
+      group.add(bottle);
+
+      // Curved front sticker label
+      const label = createCurvedLabel(stickerTex, 1.9, 2.4, 1.24, 2.4);
+      group.add(label);
+
+      // Red flip cap
+      const capMat = new THREE.MeshStandardMaterial({
+        color: 0xdc2626, // Bright red
+        roughness: 0.25,
+        metalness: 0.05
+      });
+      const capBaseGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.5, 32);
+      const capBase = new THREE.Mesh(capBaseGeo, capMat);
+      capBase.position.y = 6.6;
+      group.add(capBase);
+
+      const capTopGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.35, 32);
+      const capTop = new THREE.Mesh(capTopGeo, capMat);
+      capTop.position.y = 6.95;
+      group.add(capTop);
+
+      return group;
+    }
+
+    // 2. BUILD DISHWASH LIQUID (500ml Ergonomic Contour)
+    function buildDishwashBottle(stickerTex) {
+      const group = new THREE.Group();
+
+      const points = [
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(1.1, 0.05),
+        new THREE.Vector2(1.28, 0.5),
+        new THREE.Vector2(1.42, 1.4),
+        new THREE.Vector2(1.24, 2.6),
+        new THREE.Vector2(1.18, 3.2),
+        new THREE.Vector2(1.36, 4.4),
+        new THREE.Vector2(1.28, 4.9),
+        new THREE.Vector2(0.85, 5.4),
+        new THREE.Vector2(0.48, 5.8),
+        new THREE.Vector2(0.42, 6.2),
+        new THREE.Vector2(0, 6.2)
+      ];
+      const bottleGeo = new THREE.LatheGeometry(points, 64);
+      const bottleMat = new THREE.MeshStandardMaterial({
+        color: 0xf59e0b, // Warm lemon gold yellow
+        roughness: 0.12,
+        metalness: 0.08,
+        transparent: true,
+        opacity: 0.92
+      });
+      const bottle = new THREE.Mesh(bottleGeo, bottleMat);
+      group.add(bottle);
+
+      // Sticker label
+      const label = createCurvedLabel(stickerTex, 2.1, 2.5, 1.28, 2.4);
+      group.add(label);
+
+      // White pull-push cap
+      const capMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.22,
+        metalness: 0.04
+      });
+      const capBaseGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.5, 32);
+      const capBase = new THREE.Mesh(capBaseGeo, capMat);
+      capBase.position.y = 6.35;
+      group.add(capBase);
+
+      const capSpoutGeo = new THREE.CylinderGeometry(0.28, 0.35, 0.45, 32);
+      const capSpout = new THREE.Mesh(capSpoutGeo, capMat);
+      capSpout.position.y = 6.75;
+      group.add(capSpout);
+
+      return group;
+    }
+
+    // 3. BUILD TOILET BOWL CLEANER (500ml Angled Duck Neck)
+    function buildToiletBottle(stickerTex) {
+      const group = new THREE.Group();
+
+      const points = [
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(1.18, 0.05),
+        new THREE.Vector2(1.35, 0.4),
+        new THREE.Vector2(1.38, 1.5),
+        new THREE.Vector2(1.35, 3.6),
+        new THREE.Vector2(1.2, 4.4),
+        new THREE.Vector2(0.92, 4.9),
+        new THREE.Vector2(0.68, 5.4),
+        new THREE.Vector2(0, 5.4)
+      ];
+      const bodyGeo = new THREE.LatheGeometry(points, 64);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0x004da3, // Royal blue
+        roughness: 0.18,
+        metalness: 0.08
+      });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      group.add(body);
+
+      // Angled neck
+      const neckGeo = new THREE.CylinderGeometry(0.44, 0.64, 1.4, 32);
+      const neck = new THREE.Mesh(neckGeo, bodyMat);
+      neck.position.set(0.25, 5.7, 0);
+      neck.rotation.z = -0.32;
+      group.add(neck);
+
+      // Red angled nozzle cap
+      const capMat = new THREE.MeshStandardMaterial({
+        color: 0xdc2626,
+        roughness: 0.25,
+        metalness: 0.05
+      });
+      const capGeo = new THREE.CylinderGeometry(0.36, 0.46, 0.85, 32);
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.set(0.55, 6.5, 0);
+      cap.rotation.z = -0.32;
+      group.add(cap);
+
+      // Sticker label on front
+      const label = createCurvedLabel(stickerTex, 2.1, 2.5, 1.38, 2.4);
+      group.add(label);
+
+      return group;
+    }
+
+    // 4. BUILD RUX BLUE FABRIC WHITENER (150ml)
+    function buildBlueBottle(stickerTex) {
+      const group = new THREE.Group();
+
+      const points = [
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(0.92, 0.05),
+        new THREE.Vector2(1.02, 0.35),
+        new THREE.Vector2(1.02, 4.4),
+        new THREE.Vector2(0.94, 4.8),
+        new THREE.Vector2(0.62, 5.4),
+        new THREE.Vector2(0.4, 5.8),
+        new THREE.Vector2(0, 5.8)
+      ];
+      const bodyGeo = new THREE.LatheGeometry(points, 64);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0x1d4ed8, // Deep blue
+        roughness: 0.18,
+        metalness: 0.08
+      });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      group.add(body);
+
+      // Red flip cap
+      const capMat = new THREE.MeshStandardMaterial({
+        color: 0xdc2626,
+        roughness: 0.25
+      });
+      const capGeo = new THREE.CylinderGeometry(0.44, 0.44, 0.65, 32);
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.y = 6.0;
+      group.add(cap);
+
+      // Label
+      const label = createCurvedLabel(stickerTex, 1.8, 2.4, 1.02, 2.4);
+      group.add(label);
+
+      return group;
+    }
+
+    // 5. BUILD RUX BLEACH (500ml Disinfectant)
+    function buildBleachBottle(stickerTex) {
+      const group = new THREE.Group();
+
+      const points = [
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(1.12, 0.05),
+        new THREE.Vector2(1.24, 0.35),
+        new THREE.Vector2(1.24, 4.2),
+        new THREE.Vector2(1.06, 4.7),
+        new THREE.Vector2(0.72, 5.3),
+        new THREE.Vector2(0.46, 5.8),
+        new THREE.Vector2(0, 5.8)
+      ];
+      const bodyGeo = new THREE.LatheGeometry(points, 64);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.25,
+        metalness: 0.02
+      });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      group.add(body);
+
+      // Blue safety cap
+      const capMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        roughness: 0.25
+      });
+      const capGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.75, 32);
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.y = 6.05;
+      group.add(cap);
+
+      // Label
+      const label = createCurvedLabel(stickerTex, 2.0, 2.5, 1.24, 2.3);
+      group.add(label);
+
+      return group;
+    }
+
+    // Composite studio backdrop & 2D badge overlays onto rendered canvas
+    function compositeStudioPost(webglCanvas, title, subtitle, badgeColor, width = 1200, height = 1200) {
+      const out = document.createElement('canvas');
+      out.width = width;
+      out.height = height;
+      const ctx = out.getContext('2d');
+
+      // Studio cyc background: soft luxury gradient
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, '#ffffff');
+      bg.addColorStop(0.68, '#e2e8f0');
+      bg.addColorStop(0.69, '#cbd5e1'); // horizon floor line
+      bg.addColorStop(1, '#ffffff');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      // Soft circular spotlight
+      const spot = ctx.createRadialGradient(width * 0.5, height * 0.45, 80, width * 0.5, height * 0.45, width * 0.55);
+      spot.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      spot.addColorStop(0.6, 'rgba(0, 180, 216, 0.1)');
+      spot.addColorStop(1, 'transparent');
+      ctx.fillStyle = spot;
+      ctx.fillRect(0, 0, width, height * 0.7);
+
+      // Floor Reflection
+      ctx.save();
+      ctx.translate(0, height * 1.58);
+      ctx.scale(1, -1);
+      ctx.globalAlpha = 0.2;
+      ctx.drawImage(webglCanvas, 0, 0, width, height);
+      ctx.restore();
+
+      // Draw WebGL Rendered 3D Bottle
+      ctx.drawImage(webglCanvas, 0, 0, width, height);
+
+      // Studio Sparkles
+      drawSparkle(ctx, width * 0.32, height * 0.25, 22, '#ffffff');
+      drawSparkle(ctx, width * 0.72, height * 0.35, 26, badgeColor);
+      drawSparkle(ctx, width * 0.65, height * 0.65, 18, '#ffffff');
+
+      // Floating Bubbles
+      drawCanvasBubble(ctx, width * 0.22, height * 0.22, 28);
+      drawCanvasBubble(ctx, width * 0.78, height * 0.26, 36);
+      drawCanvasBubble(ctx, width * 0.74, height * 0.64, 22);
+
+      // Title & Subtitle Badge
+      ctx.fillStyle = badgeColor;
+      ctx.font = 'bold 26px system-ui, sans-serif';
+      ctx.fillText(title, 55, 75);
+      ctx.fillStyle = '#64748b';
+      ctx.font = '600 17px system-ui, sans-serif';
+      ctx.fillText(subtitle, 55, 108);
+
+      return out;
+    }
+
+    function drawSparkle(ctx, x, y, size = 18, color = '#ffffff') {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.shadowColor = '#00b4d8';
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      ctx.moveTo(x, y - size);
+      ctx.quadraticCurveTo(x, y, x + size, y);
+      ctx.quadraticCurveTo(x, y, x, y + size);
+      ctx.quadraticCurveTo(x, y, x - size, y);
+      ctx.quadraticCurveTo(x, y, x, y - size);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCanvasBubble(ctx, x, y, r) {
+      ctx.save();
+      const grad = ctx.createRadialGradient(x - r*0.35, y - r*0.35, r*0.1, x, y, r);
+      grad.addColorStop(0, 'rgba(255,255,255,0.85)');
+      grad.addColorStop(0.3, 'rgba(0,180,216,0.25)');
+      grad.addColorStop(0.7, 'rgba(16,185,129,0.18)');
+      grad.addColorStop(1, 'rgba(255,255,255,0.4)');
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(x - r*0.32, y - r*0.32, r*0.22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // MAIN PRODUCTION PIPELINE
+    async function start3DProduction() {
+      try {
+        log('Loading high-resolution packaging stickers...');
+        const texLoader = new THREE.TextureLoader();
+
+        const [texSurf, texDish, texToilet, texBlue, texBleach] = await Promise.all([
+          loadTextureAsync(texLoader, 'assets/images/packaging/surface-cleaner.png'),
+          loadTextureAsync(texLoader, 'assets/images/packaging/dishwasher.png'),
+          loadTextureAsync(texLoader, 'assets/images/packaging/toilet-cleaner.png'),
+          loadTextureAsync(texLoader, 'assets/images/packaging/blue.png'),
+          loadTextureAsync(texLoader, 'assets/images/packaging/bleech.png')
+        ]);
+        log('All 5 sticker textures loaded successfully.');
+
+        // Initialize WebGL Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+        renderer.setSize(1200, 1200);
+        renderer.setPixelRatio(1);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+        camera.position.set(0, 3.8, 12.5);
+        camera.lookAt(0, 3.4, 0);
+
+        // 1. RUX MULTI SURFACE CLEANER
+        log('Rendering 3D Packshot: RUX Multi Surface Cleaner (1000ml)...');
+        {
+          const scene = new THREE.Scene();
+          setupStudioLighting(scene);
+          scene.add(createGroundPlane());
+
+          const bottle = buildMultiSurfaceBottle(texSurf);
+          scene.add(bottle);
+
+          renderer.render(scene, camera);
+          const finalCanvas = compositeStudioPost(
+            renderer.domElement,
+            'RUX MULTI SURFACE CLEANER (1000ml)',
+            'Kills 99.9% Germs • Sparkling Clean Floors & Tiles • TM # 768691',
+            '#db2777'
+          );
+
+          await postImage('assets/images/products/rux-multi-surface-studio.jpg', finalCanvas.toDataURL('image/jpeg', 0.94));
+          displayPreview('RUX Multi Surface Cleaner', finalCanvas);
+        }
+
+        // 2. RUX LEMON DISHWASH LIQUID
+        log('Rendering 3D Packshot: RUX Dishwash Liquid (500ml / 300ml)...');
+        {
+          const scene = new THREE.Scene();
+          setupStudioLighting(scene);
+          scene.add(createGroundPlane());
+
+          const bottle = buildDishwashBottle(texDish);
+          scene.add(bottle);
+
+          renderer.render(scene, camera);
+          const finalCanvas = compositeStudioPost(
+            renderer.domElement,
+            'RUX LEMON DISHWASH LIQUID',
+            'Cuts Tough Grease Instantly • Sparkling Crystal Shine • 500ml & 300ml',
+            '#ca8a04'
+          );
+
+          await postImage('assets/images/products/rux-dishwash-studio.jpg', finalCanvas.toDataURL('image/jpeg', 0.94));
+          displayPreview('RUX Dishwash Liquid', finalCanvas);
+        }
+
+        // 3. RUX TOILET BOWL CLEANER
+        log('Rendering 3D Packshot: RUX Toilet Bowl Cleaner (500ml / 250ml)...');
+        {
+          const scene = new THREE.Scene();
+          setupStudioLighting(scene);
+          scene.add(createGroundPlane());
+
+          const bottle = buildToiletBottle(texToilet);
+          scene.add(bottle);
+
+          renderer.render(scene, camera);
+          const finalCanvas = compositeStudioPost(
+            renderer.domElement,
+            'RUX TOILET BOWL CLEANER',
+            'Powerful Deep Cleaning • Kills 99.9% Toilet Germs • Limescale Defense',
+            '#0056b3'
+          );
+
+          await postImage('assets/images/products/rux-toilet-cleaner-studio.jpg', finalCanvas.toDataURL('image/jpeg', 0.94));
+          displayPreview('RUX Toilet Bowl Cleaner', finalCanvas);
+        }
+
+        // 4. RUX BLUE FABRIC WHITENER
+        log('Rendering 3D Packshot: RUX Blue Fabric Whitener (150ml)...');
+        {
+          const scene = new THREE.Scene();
+          setupStudioLighting(scene);
+          scene.add(createGroundPlane());
+
+          const bottle = buildBlueBottle(texBlue);
+          scene.add(bottle);
+
+          renderer.render(scene, camera);
+          const finalCanvas = compositeStudioPost(
+            renderer.domElement,
+            'RUX BLUE FABRIC WHITENER (150ml)',
+            'Ultra Brightness for White Clothes • Dazzling Radiance • 72-Pack Wholesale',
+            '#1d4ed8'
+          );
+
+          await postImage('assets/images/products/rux-blue-studio.jpg', finalCanvas.toDataURL('image/jpeg', 0.94));
+          displayPreview('RUX Blue Fabric Whitener', finalCanvas);
+        }
+
+        // 5. RUX BLEACH (COMING SOON)
+        log('Rendering 3D Packshot: RUX Bleach (Coming Soon)...');
+        {
+          const scene = new THREE.Scene();
+          setupStudioLighting(scene);
+          scene.add(createGroundPlane());
+
+          const bottle = buildBleachBottle(texBleach);
+          scene.add(bottle);
+
+          renderer.render(scene, camera);
+          const finalCanvas = compositeStudioPost(
+            renderer.domElement,
+            'RUX DISINFECTANT BLEACH ★ COMING SOON ★',
+            'Sticker Design Finalized • Pure Germ-Kill Formulation in Production',
+            '#0284c7'
+          );
+
+          await postImage('assets/images/products/rux-bleach-studio.jpg', finalCanvas.toDataURL('image/jpeg', 0.94));
+          displayPreview('RUX Bleach (Coming Soon)', finalCanvas);
+        }
+
+        // 6. HERO COMMERCIAL ADVERTISING BANNER (1400x700 Wide 16:9)
+        log('Rendering 3D Hero Commercial Banner with all 4 Launched Bottles...');
+        {
+          renderer.setSize(1400, 700);
+          const heroCamera = new THREE.PerspectiveCamera(34, 1400 / 700, 0.1, 100);
+          heroCamera.position.set(0, 3.6, 13.5);
+          heroCamera.lookAt(0, 3.2, 0);
+
+          const scene = new THREE.Scene();
+          setupStudioLighting(scene);
+          scene.add(createGroundPlane());
+
+          // Place all 4 bottles side by side:
+          // 1) Dishwash on left
+          const dish = buildDishwashBottle(texDish);
+          dish.position.set(-4.4, 0, 0);
+          dish.rotation.y = 0.12;
+          scene.add(dish);
+
+          // 2) Multi Surface Cleaner center-left
+          const surf = buildMultiSurfaceBottle(texSurf);
+          surf.position.set(-1.5, 0, 0.4);
+          surf.rotation.y = -0.06;
+          scene.add(surf);
+
+          // 3) Toilet Bowl Cleaner center-right
+          const toilet = buildToiletBottle(texToilet);
+          toilet.position.set(1.5, 0, 0.4);
+          toilet.rotation.y = 0.08;
+          scene.add(toilet);
+
+          // 4) Blue on right
+          const blue = buildBlueBottle(texBlue);
+          blue.position.set(4.2, 0, 0);
+          blue.rotation.y = -0.12;
+          scene.add(blue);
+
+          renderer.render(scene, heroCamera);
+
+          const heroOut = document.createElement('canvas');
+          heroOut.width = 1400;
+          heroOut.height = 700;
+          const hCtx = heroOut.getContext('2d');
+
+          // Studio Cyc background
+          const hBg = hCtx.createLinearGradient(0, 0, 0, 700);
+          hBg.addColorStop(0, '#f8fafc');
+          hBg.addColorStop(0.65, '#e2e8f0');
+          hBg.addColorStop(0.66, '#cbd5e1');
+          hBg.addColorStop(1, '#ffffff');
+          hCtx.fillStyle = hBg;
+          hCtx.fillRect(0, 0, 1400, 700);
+
+          // Soft backlight glow
+          const hGlow = hCtx.createRadialGradient(700, 320, 80, 700, 320, 680);
+          hGlow.addColorStop(0, 'rgba(0, 180, 216, 0.35)');
+          hGlow.addColorStop(0.5, 'rgba(0, 86, 179, 0.15)');
+          hGlow.addColorStop(1, 'transparent');
+          hCtx.fillStyle = hGlow;
+          hCtx.fillRect(0, 0, 1400, 480);
+
+          // Floor Reflection
+          hCtx.save();
+          hCtx.translate(0, 700 * 1.58);
+          hCtx.scale(1, -1);
+          hCtx.globalAlpha = 0.18;
+          hCtx.drawImage(renderer.domElement, 0, 0);
+          hCtx.restore();
+
+          // Draw 3D rendered bottles
+          hCtx.drawImage(renderer.domElement, 0, 0);
+
+          // Cleanliness Sparkles
+          drawSparkle(hCtx, 220, 180, 22, '#ffffff');
+          drawSparkle(hCtx, 510, 140, 24, '#db2777');
+          drawSparkle(hCtx, 860, 150, 26, '#00b4d8');
+          drawSparkle(hCtx, 1180, 210, 20, '#ffffff');
+          drawSparkle(hCtx, 700, 65, 26, '#38bdf8');
+
+          // Floating Soap Bubbles
+          drawCanvasBubble(hCtx, 120, 120, 28);
+          drawCanvasBubble(hCtx, 360, 140, 22);
+          drawCanvasBubble(hCtx, 680, 95, 32);
+          drawCanvasBubble(hCtx, 1020, 130, 28);
+          drawCanvasBubble(hCtx, 1290, 180, 34);
+
+          // Top Header Banner
+          hCtx.fillStyle = 'rgba(0, 56, 115, 0.95)';
+          hCtx.font = 'bold 28px system-ui, sans-serif';
+          hCtx.textAlign = 'center';
+          hCtx.fillText('RUX CLEANING & SHINE • 4 CORE LAUNCHED PRODUCTS', 700, 52);
+          hCtx.fillStyle = '#475569';
+          hCtx.font = '600 16px system-ui, sans-serif';
+          hCtx.fillText('Dishwash Liquid • Multi Surface Cleaner • Toilet Bowl Cleaner • Blue Fabric Whitener • TM # 768691', 700, 80);
+
+          await postImage('assets/images/rux-hero-banner.jpg', heroOut.toDataURL('image/jpeg', 0.94));
+          displayPreview('Hero 16:9 Commercial Banner', heroOut);
+        }
+
+        log('🎉 ALL 6 PRODUCTION 3D STUDIO ASSETS SUCCESSFULLY GENERATED & SAVED!');
+
+      } catch (err) {
+        log('❌ 3D Production Error: ' + err.stack);
+      }
+    }
+
+    function displayPreview(title, canvas) {
+      const card = document.createElement('div');
+      card.className = 'render-card';
+      card.innerHTML = `<h4>${title}</h4>`;
+      card.appendChild(canvas);
+      document.getElementById('renderGrid').appendChild(card);
+    }
+
+    window.addEventListener('DOMContentLoaded', start3DProduction);
+  </script>
+</body>
+</html>

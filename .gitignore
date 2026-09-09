@@ -1,0 +1,11 @@
+# Dependencies & environment
+node_modules/
+.vscode/
+
+# Unrelated template from initial repo setup
+aigocy/
+
+# Temporary & OS files
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Your Order | RUX Cleaning & Shine</title>
+  <meta name="description" content="Check the real-time fulfillment and delivery status of your RUX cleaning products order.">
+  <link rel="icon" type="image/png" href="assets/images/rux-logo.png">
+  <link rel="stylesheet" href="assets/css/rux-main.css">
+  <meta name="geo.region" content="PK">
+  <meta name="geo.placename" content="Pakistan">
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <div><span>📦 Real-time Courier Tracking Hub</span></div>
+      <div class="top-bar-right">
+        <span>TM # 768691</span>
+        <a href="https://wa.me/923006458707" class="top-bar-link" target="_blank" rel="noopener">WhatsApp Help: 0300 6458707</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="container header-container">
+      <a href="index.html" class="logo-wrap">
+        <img src="assets/images/rux-logo.png" alt="RUX Logo" class="logo-img">
+      </a>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="shop.html" class="nav-link">Shop Products</a>
+        <a href="index.html#wholesale" class="nav-link">Wholesale Deals</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <a href="shop.html" class="btn btn-primary btn-sm">Shop Now</a>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
+      </div>
+    </div>
+    <div class="mobile-nav-panel" id="mobileNav">
+      <div class="mobile-nav-links">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop All Products</a>
+        <a href="index.html#wholesale">Wholesale & Cartons</a>
+        <a href="about.html">About Us</a>
+        <a href="contact.html">Contact Us</a>
+        <a href="track.html" style="color: var(--rux-blue);">Track Order</a>
+        <a href="faq.html">Help & FAQ</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Track Section -->
+  <main class="container" style="padding: 50px 20px 80px; max-width: 800px;">
+    <div style="text-align: center; margin-bottom: 35px;">
+      <span class="badge badge-primary" style="margin-bottom: 10px;">DISPATCH TRACKER</span>
+      <h1 style="font-size: 2.2rem; margin-bottom: 10px;">Track Your Shipment</h1>
+      <p style="color: #64748b;">Enter your Order ID (e.g. RUX-768691 or RUX-123456) or phone number to check status.</p>
+    </div>
+
+    <!-- Search Box -->
+    <div style="background: #fff; padding: 24px; border-radius: 18px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); margin-bottom: 35px;">
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <input type="text" id="trackInput" class="form-control" placeholder="Enter Order ID (e.g. RUX-768691)" style="flex-grow: 1;">
+        <button class="btn btn-primary" id="trackSearchBtn" style="white-space: nowrap;">
+          Search Order 🔍
+        </button>
+      </div>
+    </div>
+
+    <!-- Tracking Timeline Container (Populated dynamically) -->
+    <div id="trackResultBox" style="background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 35px; box-shadow: var(--shadow-md);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 24px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <span style="font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Active Tracking</span>
+          <h3 id="displayOrderId" style="font-size: 1.3rem; color: #0056b3;">Order #RUX-768691</h3>
+        </div>
+        <span class="badge badge-success" id="displayStatusBadge">In Transit</span>
+      </div>
+
+      <!-- Step Timeline -->
+      <div class="timeline-wrap">
+        <div class="timeline-step completed">
+          <div class="step-icon">✓</div>
+          <div class="step-label">Order Confirmed</div>
+          <div class="step-time">Day 1 • 10:30 AM</div>
+        </div>
+        <div class="timeline-step completed">
+          <div class="step-icon">📦</div>
+          <div class="step-label">Packed & Sealed</div>
+          <div class="step-time">Day 1 • 03:45 PM</div>
+        </div>
+        <div class="timeline-step current">
+          <div class="step-icon">🚚</div>
+          <div class="step-label">In Transit</div>
+          <div class="step-time">Day 2 • Out with Courier</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-icon">🏡</div>
+          <div class="step-label">Delivered</div>
+          <div class="step-time">Pending Delivery</div>
+        </div>
+      </div>
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-top: 30px; font-size: 0.88rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+          <div>
+            <strong style="color: #64748b; font-size: 0.8rem; display: block;">Courier Partner:</strong>
+            <span style="font-weight: 700;">TCS / Leopard / Call Courier</span>
+          </div>
+          <div>
+            <strong style="color: #64748b; font-size: 0.8rem; display: block;">Expected Delivery:</strong>
+            <span style="font-weight: 700; color: #059669;">Within 24 - 48 Hours</span>
+          </div>
+          <div>
+            <strong style="color: #64748b; font-size: 0.8rem; display: block;">Origin Hub:</strong>
+            <span>RUX Central Logistics</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">Need help with your parcel delivery?</p>
+        <a href="https://wa.me/923006458707?text=Hello%20RUX%20Helpdesk%2C%20I%20need%20an%20update%20on%20my%20order" target="_blank" rel="noopener" class="btn btn-whatsapp btn-sm">
+          💬 Contact Support on WhatsApp
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Floating WhatsApp Quick Button -->
+  <a href="https://wa.me/923006458707?text=Hello%20RUX%20Team%2C%20I%20have%20an%20inquiry%20about%20your%20products" class="floating-whatsapp" target="_blank" rel="noopener" title="Chat with RUX on WhatsApp">
+    💬
+  </a>
+
+  <footer class="main-footer">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <p>© <span class="current-year">2026</span> RUX Cleaning & Shine (TM # 768691). All Rights Reserved.</p>
+        <p style="margin: 4px 0 0 0; font-size: 0.82rem; color: #94a3b8;">Designed by <a href="https://apexmarketings.com/" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: underline; font-weight: 600;">Apex Marketings</a> &nbsp;|&nbsp; Developed by <a href="https://www.apexitsolutions.co/" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: underline; font-weight: 600;">Apex IT Solutions</a></p>
+      </div>
+      <div style="display: flex; gap: 16px; font-size: 0.85rem;">
+        <a href="faq.html">Help & FAQ</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="contact.html">Wholesale Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/rux-store.js"></script>
+  <script src="assets/js/rux-effects.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramId = urlParams.get("id");
+      const trackInput = document.getElementById("trackInput");
+      const trackBtn = document.getElementById("trackSearchBtn");
+      const displayId = document.getElementById("displayOrderId");
+
+      if (paramId) {
+        trackInput.value = paramId;
+        displayId.textContent = `Order #${paramId}`;
+      }
+
+      trackBtn.addEventListener("click", () => {
+        const val = trackInput.value.trim();
+        if (!val) {
+          alert("Please enter a valid Order ID");
+          return;
+        }
+        displayId.textContent = `Order #${val.toUpperCase()}`;
+        ruxStore.showToast(`Updated shipment timeline for ${val.toUpperCase()}`);
+      });
+    });
+  </script>
+</body>
+</html>
